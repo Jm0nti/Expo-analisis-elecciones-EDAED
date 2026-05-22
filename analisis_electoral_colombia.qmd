@@ -1,0 +1,933 @@
+---
+title: "Análisis Electoral Colombia"
+subtitle: "Propuesta Descriptiva y Exploratoria — Primera Vuelta 2022 → 2026"
+author: "Estadística Descriptiva"
+date: "Mayo 2026"
+format:
+  revealjs:
+    theme: [dark, custom.scss]
+    slide-number: c/t
+    transition: fade
+    transition-speed: fast
+    progress: true
+    controls: true
+    width: 1280
+    height: 720
+    margin: 0.05
+    footer: "Registraduría Nacional del Estado Civil · Primera Vuelta 2022"
+    logo: ""
+execute:
+  echo: false
+  warning: false
+---
+
+```{python}
+#| label: setup
+#| include: false
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import seaborn as sns
+from io import StringIO
+
+# ── Paleta Colombia ──────────────────────────────────────────────
+COL_AMARILLO = "#F5C518"
+COL_AZUL     = "#003087"
+COL_ROJO     = "#CE1126"
+COL_BG       = "#0A0A0F"
+COL_SURFACE  = "#1C1C28"
+COL_TEXT     = "#E8E6E0"
+COL_MUTED    = "#7A7A8C"
+
+C_PETRO      = "#FF6B6B"
+C_GUTIERREZ  = "#4FC3F7"
+C_HERNANDEZ  = "#F5C518"
+C_FAJARDO    = "#7BFF8B"
+C_BLANCO     = "#9E9E9E"
+
+plt.rcParams.update({
+    "figure.facecolor":  COL_BG,
+    "axes.facecolor":    COL_SURFACE,
+    "axes.edgecolor":    "#2A2A3A",
+    "axes.labelcolor":   COL_TEXT,
+    "xtick.color":       COL_MUTED,
+    "ytick.color":       COL_MUTED,
+    "text.color":        COL_TEXT,
+    "grid.color":        "#2A2A3A",
+    "grid.linewidth":    0.6,
+    "font.family":       "monospace",
+    "figure.dpi":        130,
+})
+
+# ── Datos del CSV (extracto provisto) ────────────────────────────
+raw_csv = """DEP;DEPNOMBRE;MUN;MUNNOMBRE;ZONA;PUESTO;PUESNOMBRE;MESA;CORCODIGO;CORNOMBRE;CIR;PAR;PARNOMBRE;CAN;CANNOMBRE;VOTOS
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;3
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;2
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;53
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;13
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;4
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;20
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;0304;PARTIDO VERDE OXIGENO;008;INGRID BETANCOURT;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;87
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;8
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;15
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;021;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;8
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;021;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;16
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;021;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;021;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;17
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;22
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;0527;COLOMBIA PIENSA EN GRANDE;007;LUIS PÉREZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;22
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;6
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;11
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;2
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;138
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;8
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;10
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;123
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;9
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;6
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;8
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;3
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;55
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;66
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;15
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;13
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;28
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;0997;VOTOS NULOS;997;VOTOS NULOS;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;3
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;14
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;0997;VOTOS NULOS;997;VOTOS NULOS;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;3
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;71
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;20
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;27
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;9
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;2
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;0527;COLOMBIA PIENSA EN GRANDE;007;LUIS PÉREZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;43
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;9
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;33
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;59
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;0997;VOTOS NULOS;997;VOTOS NULOS;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;15
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;48
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;16
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;34
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;19
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;69
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;7
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;34
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;1
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;0527;COLOMBIA PIENSA EN GRANDE;007;LUIS PÉREZ;1
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;28
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;3"""
+
+df_raw = pd.read_csv(StringIO(raw_csv), sep=";", dtype={"VOTOS": int})
+
+# Separar votos especiales
+ESPECIALES = [996, 997]
+df_val  = df_raw[~df_raw["CAN"].isin(ESPECIALES)].copy()
+df_esp  = df_raw[df_raw["CAN"].isin(ESPECIALES)].copy()
+
+# Nombres cortos de candidatos
+nombre_corto = {
+    "GUSTAVO PETRO":          "Petro",
+    "FEDERICO GUTIÉRREZ":     "Gutiérrez",
+    "RODOLFO HERNÁNDEZ":      "Hernández",
+    "SERGIO FAJARDO":         "Fajardo",
+    "JOHN MILTON RODRÍGUEZ":  "J.M. Rodríguez",
+    "INGRID BETANCOURT":      "Betancourt",
+    "LUIS PÉREZ":             "L. Pérez",
+}
+df_val["CAND_CORTO"] = df_val["CANNOMBRE"].map(nombre_corto).fillna(df_val["CANNOMBRE"])
+
+# Pivot por mesa
+mesa_pivot = df_val.pivot_table(
+    index=["DEP","MUN","MUNNOMBRE","PUESTO","PUESNOMBRE","MESA"],
+    columns="CAND_CORTO",
+    values="VOTOS",
+    aggfunc="sum",
+    fill_value=0
+).reset_index()
+
+# Total votos válidos por mesa
+cands = ["Petro","Gutiérrez","Hernández","Fajardo","J.M. Rodríguez","Betancourt","L. Pérez"]
+cands_ok = [c for c in cands if c in mesa_pivot.columns]
+mesa_pivot["total_validos"] = mesa_pivot[cands_ok].sum(axis=1)
+
+# Porcentajes
+for c in cands_ok:
+    mesa_pivot[f"pct_{c}"] = mesa_pivot[c] / mesa_pivot["total_validos"] * 100
+
+# Ganador por mesa
+mesa_pivot["ganador"] = mesa_pivot[cands_ok].idxmax(axis=1)
+
+# Colores por candidato
+col_cand = {
+    "Petro":          C_PETRO,
+    "Gutiérrez":      C_GUTIERREZ,
+    "Hernández":      C_HERNANDEZ,
+    "Fajardo":        C_FAJARDO,
+    "J.M. Rodríguez": "#E040FB",
+    "Betancourt":     "#FF9800",
+    "L. Pérez":       "#26C6DA",
+}
+```
+
+## {background-color="#0A0A0F"}
+
+```{python}
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(13, 5.5), facecolor=COL_BG)
+ax.set_visible(False)
+
+# Franja bandera
+for i, (x, color) in enumerate(zip([0.03, 0.055, 0.08], [COL_AMARILLO, COL_AZUL, COL_ROJO])):
+    rect = mpatches.FancyBboxPatch((0.01, 0.1+i*0.025), 0.006, 0.018,
+                                    boxstyle="round,pad=0.001",
+                                    facecolor=color, transform=fig.transFigure,
+                                    clip_on=False)
+    fig.add_patch(rect)
+
+# Línea acento
+line = plt.Line2D([0.03, 0.03], [0.08, 0.95],
+                   color=COL_AMARILLO, linewidth=3, transform=fig.transFigure, clip_on=False)
+fig.add_artist(line)
+
+fig.text(0.05, 0.88, "ESTADÍSTICA DESCRIPTIVA  ·  ANÁLISIS EXPLORATORIO DE DATOS",
+         fontsize=9, color=COL_AMARILLO, transform=fig.transFigure,
+         fontfamily="monospace", letterspacing=1)
+
+fig.text(0.05, 0.62, "Elecciones Presidenciales\nColombia 2022",
+         fontsize=42, fontweight="bold", color=COL_TEXT, transform=fig.transFigure,
+         linespacing=1.1)
+
+fig.text(0.05, 0.44,
+         "Propuesta de análisis descriptivo y exploratorio\nde los resultados de primera vuelta — mesa por mesa",
+         fontsize=13, color=COL_MUTED, transform=fig.transFigure, linespacing=1.5)
+
+# Métricas
+metrics = [("33 M", "Votos emitidos"), ("105 K+", "Mesas de votación"),
+           ("8", "Candidatos"), ("31 May 2026", "Primera vuelta")]
+for i, (val, lab) in enumerate(metrics):
+    x = 0.05 + i * 0.22
+    fig.text(x, 0.22, val, fontsize=20, fontweight="bold",
+             color=COL_AMARILLO, transform=fig.transFigure)
+    fig.text(x, 0.14, lab, fontsize=8, color=COL_MUTED,
+             transform=fig.transFigure, fontfamily="monospace")
+
+plt.tight_layout()
+plt.show()
+```
+
+## Contenido de la Presentación
+
+::: columns
+::: {.column width="50%"}
+**01 · La Base de Datos**
+Estructura, variables, granularidad y calidad del dataset de la Registraduría
+
+**02 · Análisis Univariado**
+Distribuciones, medidas de posición y dispersión por candidato, zona y mesa
+:::
+::: {.column width="50%"}
+**03 · Análisis Bivariado**
+Correlaciones, comparaciones entre candidatos y patrones geográficos
+
+**04 · Hipótesis y Metodología**
+Preguntas exploratorias, herramientas y hoja de ruta para el trabajo final
+:::
+:::
+
+---
+
+## {background-color="#12121A"}
+
+<br>
+
+::: {style="font-size: 5em; font-weight: 900; color: rgba(245,197,24,0.12); position: absolute; right: 60px; top: 40px;"}
+01
+:::
+
+::: {style="color: #F5C518; font-family: monospace; font-size: 0.8em; letter-spacing: 0.2em; margin-bottom: 16px;"}
+▸ SECCIÓN
+:::
+
+### [La Base de Datos]{style="color: #E8E6E0;"}
+
+La estructura del archivo de la Registraduría a nivel de mesa de votación
+
+---
+
+## Diccionario de Variables
+
+| Campo | Descripción | Tipo | Ejemplo |
+|-------|-------------|------|---------|
+| `DEP` / `DEPNOMBRE` | Departamento | Categórica | 88 / CONSULADOS |
+| `MUN` / `MUNNOMBRE` | Municipio o país | Categórica | 155 / ARGENTINA |
+| `ZONA` | Zona electoral | Categórica | 05, 10 |
+| `PUESTO` / `PUESNOMBRE` | Puesto de votación | Categórica | 02 / BUENOS AIRES |
+| `MESA` | Mesa dentro del puesto | Categórica | 001 – 022 |
+| `PARNOMBRE` | Partido / coalición | Categórica | PACTO HISTÓRICO |
+| `CANNOMBRE` | Nombre del candidato | Categórica | GUSTAVO PETRO |
+| `VOTOS` | Votos en esa mesa para ese candidato | **Numérica** | 53, 138 |
+
+::: {.callout-warning}
+`CAN=996` (Votos en Blanco) y `CAN=997` (Votos Nulos) aparecen como candidatos — deben separarse antes del análisis.
+:::
+
+---
+
+## Estructura del Dataset
+
+::: columns
+::: {.column width="55%"}
+**Formato largo** (long format)
+
+Cada fila = 1 candidato × 1 mesa
+
+Para análisis por mesa → **pivot a formato ancho**
+
+```python
+# Transformación básica
+df = pd.read_csv('resultados_1v.csv', sep=';')
+
+# Separar votos especiales
+validos = df[~df['CAN'].isin([996, 997])]
+
+# Pivot a formato ancho
+mesa_df = validos.pivot_table(
+  index=['DEP','MUN','PUESTO','MESA'],
+  columns='CANNOMBRE',
+  values='VOTOS',
+  aggfunc='sum'
+)
+```
+:::
+::: {.column width="45%"}
+
+**Variables derivadas propuestas:**
+
+- `total_validos` — suma votos válidos por mesa
+- `pct_[candidato]` — participación relativa normalizada
+- `ganador_mesa` — candidato con más votos
+- `margen_victoria` — diferencia entre 1° y 2°
+- `indice_shannon` — entropía del voto (fragmentación)
+- `pct_blanco_nulo` — proxy de descontento
+
+:::
+:::
+
+---
+
+## {background-color="#12121A"}
+
+::: {style="font-size: 5em; font-weight: 900; color: rgba(245,197,24,0.12); position: absolute; right: 60px; top: 40px;"}
+02
+:::
+
+::: {style="color: #F5C518; font-family: monospace; font-size: 0.8em; letter-spacing: 0.2em; margin-bottom: 16px;"}
+▸ SECCIÓN
+:::
+
+### [Análisis Univariado]{style="color: #E8E6E0;"}
+
+Distribuciones individuales de las variables clave
+
+---
+
+## Resumen Nacional — Primera Vuelta 2022
+
+```{python}
+#| fig-align: center
+#| fig-height: 4.2
+
+# Resultados nacionales reales 1ra vuelta 2022
+nac = {
+    "Petro":      (4_480_609, 40.32),
+    "Gutiérrez":  (3_137_108, 28.15),
+    "Hernández":  (2_650_291, 23.87),
+    "Fajardo":    (  467_051,  4.20),
+    "Betancourt": (  210_848,  1.90),
+    "J.M. Rodríguez": (  93_042,  0.84),
+    "L. Pérez":   (   52_409,  0.47),
+}
+
+fig, ax = plt.subplots(figsize=(11, 4), facecolor=COL_BG)
+ax.set_facecolor(COL_SURFACE)
+
+names  = list(nac.keys())
+votos  = [v[0]/1e6 for v in nac.values()]
+pcts   = [v[1] for v in nac.values()]
+colors = [col_cand.get(n, COL_MUTED) for n in names]
+
+bars = ax.barh(names[::-1], votos[::-1], color=colors[::-1],
+               height=0.6, edgecolor="none")
+for bar, pct in zip(bars, pcts[::-1]):
+    ax.text(bar.get_width() + 0.04, bar.get_y() + bar.get_height()/2,
+            f"{pct:.1f}%", va="center", fontsize=10,
+            color=COL_TEXT, fontfamily="monospace")
+
+ax.set_xlabel("Millones de votos", color=COL_MUTED)
+ax.set_xlim(0, 5.5)
+ax.grid(axis="x", alpha=0.3)
+ax.spines[["top","right","left","bottom"]].set_visible(False)
+ax.tick_params(axis="y", length=0)
+fig.suptitle("Resultados Nacionales — Primera Vuelta 31 Mayo 2022",
+             color=COL_TEXT, fontsize=12, fontweight="bold", x=0.05, ha="left")
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+## Distribución de Votos por Mesa (Extracto CSV)
+
+```{python}
+#| fig-align: center
+#| fig-height: 4.5
+
+fig, axes = plt.subplots(1, 3, figsize=(12, 4.2), facecolor=COL_BG)
+
+# ── Panel 1: Total votos por mesa ──────────────────────────────
+ax = axes[0]
+ax.set_facecolor(COL_SURFACE)
+total_vals = mesa_pivot["total_validos"]
+ax.hist(total_vals, bins=8, color=COL_AMARILLO, alpha=0.8,
+        edgecolor=COL_BG, linewidth=0.5)
+ax.axvline(total_vals.mean(),   color=C_PETRO, lw=1.5, ls="--", label=f"Media: {total_vals.mean():.0f}")
+ax.axvline(total_vals.median(), color=C_FAJARDO, lw=1.5, ls=":",  label=f"Mediana: {total_vals.median():.0f}")
+ax.set_title("Votos totales/mesa", color=COL_TEXT, fontsize=10)
+ax.set_xlabel("Votos válidos", color=COL_MUTED, fontsize=9)
+ax.legend(fontsize=8, framealpha=0.2, labelcolor=COL_TEXT)
+ax.spines[["top","right"]].set_visible(False)
+ax.grid(axis="y", alpha=0.3)
+
+# ── Panel 2: Boxplots por candidato ───────────────────────────
+ax = axes[1]
+ax.set_facecolor(COL_SURFACE)
+cands_box = [c for c in ["Petro","Gutiérrez","Hernández","Fajardo"] if c in mesa_pivot.columns]
+data_box  = [mesa_pivot[c].values for c in cands_box]
+bp = ax.boxplot(data_box, patch_artist=True, vert=True,
+                medianprops=dict(color="white", lw=2),
+                whiskerprops=dict(color=COL_MUTED),
+                capprops=dict(color=COL_MUTED),
+                flierprops=dict(marker="o", color=COL_MUTED, alpha=0.4, ms=4))
+for patch, cand in zip(bp["boxes"], cands_box):
+    patch.set_facecolor(col_cand.get(cand, COL_MUTED))
+    patch.set_alpha(0.7)
+ax.set_xticklabels(cands_box, rotation=12, fontsize=9)
+ax.set_title("Distribución votos/mesa\npor candidato", color=COL_TEXT, fontsize=10)
+ax.set_ylabel("Votos en la mesa", color=COL_MUTED, fontsize=9)
+ax.spines[["top","right"]].set_visible(False)
+ax.grid(axis="y", alpha=0.3)
+
+# ── Panel 3: Ganador por mesa ──────────────────────────────────
+ax = axes[2]
+ax.set_facecolor(COL_SURFACE)
+gan_counts = mesa_pivot["ganador"].value_counts()
+wedge_colors = [col_cand.get(c, COL_MUTED) for c in gan_counts.index]
+wedges, texts, autotexts = ax.pie(
+    gan_counts.values,
+    labels=gan_counts.index,
+    autopct="%1.0f%%",
+    colors=wedge_colors,
+    startangle=90,
+    pctdistance=0.75,
+    textprops={"color": COL_TEXT, "fontsize": 9},
+    wedgeprops={"edgecolor": COL_BG, "linewidth": 1.5}
+)
+for at in autotexts:
+    at.set_color("white")
+    at.set_fontsize(8)
+ax.set_title("Ganador por mesa\n(extracto)", color=COL_TEXT, fontsize=10)
+
+plt.suptitle("Análisis Univariado — Extracto de datos (consulados)",
+             color=COL_TEXT, fontsize=11, fontweight="bold",
+             x=0.05, ha="left", y=1.01)
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+## Estadísticas Descriptivas por Mesa
+
+```{python}
+#| fig-align: center
+
+desc = mesa_pivot[cands_ok + ["total_validos"]].describe().round(1)
+desc.index.name = ""
+desc_rename = {c: c for c in desc.columns}
+print_cols   = ["total_validos"] + [c for c in cands_ok if c in desc.columns]
+
+styled = desc[print_cols].rename(columns={"total_validos": "Total/mesa"})
+
+import warnings; warnings.filterwarnings("ignore")
+from IPython.display import display
+display(styled.style
+    .set_table_styles([
+        {"selector": "thead th",
+         "props": [("background-color","#1C1C28"),
+                   ("color","#F5C518"),
+                   ("font-size","0.85em"),
+                   ("border-bottom","1px solid #2A2A3A")]},
+        {"selector": "tbody td",
+         "props": [("background-color","#12121A"),
+                   ("color","#E8E6E0"),
+                   ("font-size","0.85em"),
+                   ("border-bottom","1px solid #1C1C28")]},
+        {"selector": "tbody tr:hover td",
+         "props": [("background-color","#1C1C28")]},
+    ])
+    .format(precision=1)
+)
+```
+
+::: {.callout-note}
+**Coeficiente de variación** = desv.std / media — mide la dispersión relativa entre mesas. Petro muestra la mayor variabilidad absoluta pero no necesariamente la relativa.
+:::
+
+---
+
+## Votos Blancos y Nulos — Análisis Especial
+
+```{python}
+#| fig-align: center
+#| fig-height: 4
+
+df_esp_g = df_esp.groupby(["MUNNOMBRE","CANNOMBRE"])["VOTOS"].sum().reset_index()
+
+fig, axes = plt.subplots(1, 2, figsize=(11, 3.8), facecolor=COL_BG)
+
+# ── Blancos y Nulos por consulado ─────────────────────────────
+ax = axes[0]
+ax.set_facecolor(COL_SURFACE)
+piv_esp = df_esp_g.pivot_table(index="MUNNOMBRE", columns="CANNOMBRE",
+                                values="VOTOS", fill_value=0)
+if "VOTOS EN BLANCO" in piv_esp.columns:
+    ax.bar(piv_esp.index, piv_esp["VOTOS EN BLANCO"],
+           color=COL_MUTED, alpha=0.8, label="En Blanco", edgecolor=COL_BG)
+if "VOTOS NULOS" in piv_esp.columns:
+    ax.bar(piv_esp.index, piv_esp["VOTOS NULOS"],
+           bottom=piv_esp.get("VOTOS EN BLANCO", 0),
+           color=C_PETRO, alpha=0.7, label="Nulos", edgecolor=COL_BG)
+ax.set_title("Votos especiales por consulado", color=COL_TEXT, fontsize=10)
+ax.set_ylabel("Votos", color=COL_MUTED, fontsize=9)
+ax.tick_params(axis="x", rotation=15, labelsize=9)
+ax.legend(fontsize=8, framealpha=0.2, labelcolor=COL_TEXT)
+ax.spines[["top","right"]].set_visible(False)
+ax.grid(axis="y", alpha=0.3)
+
+# ── % blanco+nulo sobre total emitidos ────────────────────────
+ax = axes[1]
+ax.set_facecolor(COL_SURFACE)
+total_esp = df_esp.groupby("MUNNOMBRE")["VOTOS"].sum()
+total_all = df_raw.groupby("MUNNOMBRE")["VOTOS"].sum()
+pct_esp   = (total_esp / total_all * 100).dropna().sort_values(ascending=True)
+
+colors_esp = [C_PETRO if v > pct_esp.median() else COL_AMARILLO for v in pct_esp.values]
+ax.barh(pct_esp.index, pct_esp.values, color=colors_esp, alpha=0.8, edgecolor=COL_BG)
+ax.axvline(pct_esp.median(), color="white", lw=1, ls="--",
+           label=f"Mediana: {pct_esp.median():.1f}%")
+ax.set_title("% Votos blancos+nulos\nsobre total emitidos", color=COL_TEXT, fontsize=10)
+ax.set_xlabel("% del total", color=COL_MUTED, fontsize=9)
+ax.legend(fontsize=8, framealpha=0.2, labelcolor=COL_TEXT)
+ax.spines[["top","right"]].set_visible(False)
+ax.grid(axis="x", alpha=0.3)
+ax.tick_params(axis="y", labelsize=9)
+
+plt.suptitle("Análisis de Votos No Válidos — Proxy de Descontento Electoral",
+             color=COL_TEXT, fontsize=11, fontweight="bold", x=0.04, ha="left")
+plt.tight_layout()
+plt.show()
+```
+
+---
+
+## {background-color="#12121A"}
+
+::: {style="font-size: 5em; font-weight: 900; color: rgba(245,197,24,0.12); position: absolute; right: 60px; top: 40px;"}
+03
+:::
+
+::: {style="color: #F5C518; font-family: monospace; font-size: 0.8em; letter-spacing: 0.2em; margin-bottom: 16px;"}
+▸ SECCIÓN
+:::
+
+### [Análisis Bivariado]{style="color: #E8E6E0;"}
+
+Correlaciones, comparaciones geográficas y patrones de votación
+
+---
+
+## Correlaciones entre Candidatos — Por Mesa
+
+```{python}
+#| fig-align: center
+#| fig-height: 4.2
+
+cands_corr = [c for c in ["Petro","Gutiérrez","Hernández","Fajardo"] if c in mesa_pivot.columns]
+corr_mat = mesa_pivot[cands_corr].corr()
+
+fig, ax = plt.subplots(figsize=(7, 4.5), facecolor=COL_BG)
+ax.set_facecolor(COL_SURFACE)
+
+from matplotlib.colors import LinearSegmentedColormap
+cmap = LinearSegmentedColormap.from_list("col",
+    [(0.0, C_PETRO), (0.5, COL_SURFACE), (1.0, C_FAJARDO)])
+
+im = ax.imshow(corr_mat.values, cmap=cmap, vmin=-1, vmax=1, aspect="auto")
+cbar = plt.colorbar(im, ax=ax, fraction=0.04, pad=0.04)
+cbar.ax.yaxis.set_tick_params(color=COL_MUTED)
+cbar.ax.tick_params(labelsize=9, colors=COL_MUTED)
+
+ax.set_xticks(range(len(cands_corr))); ax.set_xticklabels(cands_corr, fontsize=10)
+ax.set_yticks(range(len(cands_corr))); ax.set_yticklabels(cands_corr, fontsize=10)
+
+for i in range(len(cands_corr)):
+    for j in range(len(cands_corr)):
+        v = corr_mat.values[i,j]
+        ax.text(j, i, f"{v:.2f}", ha="center", va="center",
+                fontsize=12, fontweight="bold",
+                color="white" if abs(v) > 0.4 else COL_TEXT)
+
+ax.set_title("Correlación de Pearson entre candidatos\n(votos absolutos por mesa — extracto consulados)",
+             color=COL_TEXT, fontsize=11, pad=12)
+ax.spines[["top","right","bottom","left"]].set_visible(False)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.callout-tip}
+Con el dataset completo se esperaría una **correlación negativa** fuerte entre Petro y Gutiérrez — electorados opuestos en el espectro político.
+:::
+
+---
+
+## Caso de Estudio: Voto en el Exterior
+
+```{python}
+#| fig-align: center
+#| fig-height: 4.2
+
+# Agregado por país y candidato (extracto)
+ext = df_val.groupby(["MUNNOMBRE","CAND_CORTO"])["VOTOS"].sum().reset_index()
+ext_pivot = ext.pivot_table(index="MUNNOMBRE", columns="CAND_CORTO",
+                             values="VOTOS", fill_value=0)
+
+cands_ext = [c for c in ["Petro","Gutiérrez","Hernández","Fajardo"] if c in ext_pivot.columns]
+total_ext  = ext_pivot[cands_ext].sum(axis=1)
+ext_pct    = ext_pivot[cands_ext].div(total_ext, axis=0) * 100
+
+fig, ax = plt.subplots(figsize=(11, 4), facecolor=COL_BG)
+ax.set_facecolor(COL_SURFACE)
+
+x     = np.arange(len(ext_pct.index))
+width = 0.18
+for i, cand in enumerate(cands_ext):
+    offset = (i - len(cands_ext)/2 + 0.5) * width
+    bars = ax.bar(x + offset, ext_pct[cand], width,
+                  label=cand, color=col_cand.get(cand, COL_MUTED),
+                  alpha=0.85, edgecolor=COL_BG, linewidth=0.5)
+
+ax.set_xticks(x)
+ax.set_xticklabels(ext_pct.index, rotation=10, fontsize=10)
+ax.set_ylabel("% del total de votos válidos", color=COL_MUTED)
+ax.set_ylim(0, 85)
+ax.legend(fontsize=9, framealpha=0.15, labelcolor=COL_TEXT, ncol=2)
+ax.spines[["top","right"]].set_visible(False)
+ax.grid(axis="y", alpha=0.3)
+ax.set_title("Distribución del voto por país — Consulados (extracto)\n% sobre votos válidos en cada consulado",
+             color=COL_TEXT, fontsize=11, x=0, ha="left")
+plt.tight_layout()
+plt.show()
+```
+
+> Buenos Aires vota **~57% Petro**, Curazao vota **~51% Hernández** — patrones radicalmente distintos dentro del mismo segmento "exterior".
+
+---
+
+## Scatter: Petro vs Gutiérrez por Mesa
+
+```{python}
+#| fig-align: center
+#| fig-height: 4.2
+
+if "Petro" in mesa_pivot.columns and "Gutiérrez" in mesa_pivot.columns:
+    fig, ax = plt.subplots(figsize=(8, 4.2), facecolor=COL_BG)
+    ax.set_facecolor(COL_SURFACE)
+
+    x_vals = mesa_pivot["Gutiérrez"]
+    y_vals = mesa_pivot["Petro"]
+
+    # Color por ganador
+    scatter_colors = [col_cand.get(g, COL_MUTED) for g in mesa_pivot["ganador"]]
+
+    ax.scatter(x_vals, y_vals, c=scatter_colors, s=90,
+               alpha=0.75, edgecolors=COL_BG, linewidths=0.5)
+
+    # Línea de igualdad
+    lim = max(x_vals.max(), y_vals.max()) + 5
+    ax.plot([0, lim], [0, lim], color=COL_MUTED, lw=1, ls="--", alpha=0.5,
+            label="Votos iguales")
+
+    # Anotaciones
+    for _, row in mesa_pivot.iterrows():
+        if row["Petro"] > 50 or row["Gutiérrez"] > 25:
+            ax.annotate(f"Mesa {row['MESA']}\n{row['MUNNOMBRE']}",
+                        (row["Gutiérrez"], row["Petro"]),
+                        fontsize=7, color=COL_MUTED,
+                        xytext=(4, 4), textcoords="offset points")
+
+    # Leyenda de colores
+    for cand in ["Petro", "Gutiérrez", "Hernández"]:
+        ax.scatter([], [], c=col_cand.get(cand, COL_MUTED), s=60,
+                   label=f"Gana {cand}", alpha=0.85)
+
+    ax.set_xlabel("Votos Gutiérrez (por mesa)", color=COL_MUTED)
+    ax.set_ylabel("Votos Petro (por mesa)", color=COL_MUTED)
+    ax.set_title("Dispersión Petro vs Gutiérrez — cada punto = 1 mesa\n(extracto consulados)",
+                 color=COL_TEXT, fontsize=11, x=0, ha="left")
+    ax.legend(fontsize=8, framealpha=0.15, labelcolor=COL_TEXT)
+    ax.spines[["top","right"]].set_visible(False)
+    ax.grid(alpha=0.2)
+    plt.tight_layout()
+    plt.show()
+```
+
+::: {.callout-tip}
+Con el dataset nacional, este gráfico permitiría identificar **mesas en disputa** (zona central) vs **mesas dominadas** (extremos del gráfico).
+:::
+
+---
+
+## {background-color="#12121A"}
+
+::: {style="font-size: 5em; font-weight: 900; color: rgba(245,197,24,0.12); position: absolute; right: 60px; top: 40px;"}
+04
+:::
+
+::: {style="color: #F5C518; font-family: monospace; font-size: 0.8em; letter-spacing: 0.2em; margin-bottom: 16px;"}
+▸ SECCIÓN
+:::
+
+### [Hipótesis y Metodología]{style="color: #E8E6E0;"}
+
+Preguntas exploratorias y hoja de ruta para el trabajo final
+
+---
+
+## Preguntas Exploratorias Clave
+
+::: incremental
+- **H1 · Geografía del voto progresista** — ¿El porcentaje de votos por Petro aumenta con el tamaño del municipio? → *Regresión simple + mapa coroplético*
+
+- **H2 · Varianza intra vs. inter municipal** — ¿Las mesas dentro de un mismo municipio votan de forma más homogénea que entre municipios? → *ANOVA de un factor*
+
+- **H3 · Voto exterior ≠ Interior** — ¿Los colombianos en el exterior votan de manera estadísticamente diferente al interior? → *Prueba t de dos muestras / Mann-Whitney*
+
+- **H4 · Mesas anómalas** — ¿Existen mesas con patrones de votación estadísticamente atípicos? → *Z-score multivariado / Distancia de Mahalanobis*
+:::
+
+---
+
+## Análisis Propuestos para el Trabajo Final
+
+| # | Análisis | Técnica | Nivel |
+|---|----------|---------|-------|
+| 1 | Estadísticas descriptivas completas | Media, σ, curtosis, sesgo | Mesa |
+| 2 | Mapas coropléticos interactivos | Folium / Plotly choropleth | Municipal |
+| 3 | Clustering de municipios | K-Means / Ward | Municipal |
+| 4 | Detección de mesas atípicas | Z-score, Mahalanobis | Mesa |
+| 5 | Diáspora vs interior | Test t, Mann-Whitney | Segmento |
+| 6 | Índice de competitividad | Margen 1°–2° lugar | Municipal |
+| 7 | Entropía del voto | Índice de Shannon | Mesa/Mun |
+| 8 | Comparativa 2022 vs 2026 | Δ porcentual, correlación | Nacional |
+
+---
+
+## Hoja de Ruta Metodológica
+
+```{python}
+#| fig-align: center
+#| fig-height: 4
+
+fig, ax = plt.subplots(figsize=(11, 3.8), facecolor=COL_BG)
+ax.set_visible(False)
+
+steps = [
+    ("01\nIngesta", "Leer CSV `;`\nValidar tipos\nSeparar CAN 996/997"),
+    ("02\nTransform.", "Pivot a ancho\nVariables derivadas\npct_, ganador, margen"),
+    ("03\nUnivariado", "Histogramas, KDE\nBoxplots\nTablas de frecuencia"),
+    ("04\nBivariado", "Correlaciones\nScatter plots\nANOVA, Mann-Whitney"),
+    ("05\nVisualiz.", "Mapas Folium\nDashboard Plotly\nQuarto RevealJS"),
+]
+
+colors_step = [COL_AMARILLO, C_GUTIERREZ, C_FAJARDO, C_PETRO, COL_MUTED]
+n = len(steps)
+
+for i, ((num, title), color) in enumerate(zip(steps, colors_step)):
+    x = 0.08 + i * 0.185
+    # Caja
+    rect = mpatches.FancyBboxPatch((x-0.075, 0.15), 0.145, 0.72,
+                                    boxstyle="round,pad=0.01",
+                                    facecolor=COL_SURFACE,
+                                    edgecolor=color, linewidth=2,
+                                    transform=fig.transFigure, clip_on=False)
+    fig.add_patch(rect)
+    # Número grande
+    fig.text(x, 0.73, num.split("\n")[0], ha="center", va="center",
+             fontsize=22, fontweight="bold", color=color,
+             transform=fig.transFigure)
+    fig.text(x, 0.62, num.split("\n")[1], ha="center", va="center",
+             fontsize=10, fontweight="bold", color=COL_TEXT,
+             transform=fig.transFigure)
+    # Descripción
+    fig.text(x, 0.38, title, ha="center", va="center",
+             fontsize=7.5, color=COL_MUTED, linespacing=1.5,
+             transform=fig.transFigure)
+    # Flecha
+    if i < n-1:
+        ax2 = fig.add_axes([x + 0.075, 0.48, 0.035, 0.06])
+        ax2.set_visible(False)
+        fig.text(x + 0.093, 0.51, "→", ha="center", va="center",
+                 fontsize=18, color=COL_MUTED, transform=fig.transFigure)
+
+# Herramientas
+fig.text(0.5, 0.04,
+         "Stack: Python · Pandas · NumPy · Seaborn · Plotly · Scipy · Scikit-learn · Folium · Quarto",
+         ha="center", fontsize=8, color=COL_MUTED,
+         fontfamily="monospace", transform=fig.transFigure)
+
+plt.show()
+```
+
+---
+
+## Variables Derivadas Propuestas
+
+```{python}
+vars_df = pd.DataFrame({
+    "Variable": [
+        "total_validos", "pct_[candidato]", "ganador_mesa",
+        "margen_victoria", "indice_shannon", "pct_blanco_nulo", "tipo_zona"
+    ],
+    "Definición": [
+        "Suma votos válidos en la mesa",
+        "Votos candidato / total_validos × 100",
+        "Candidato con más votos en la mesa",
+        "Diferencia pct entre 1° y 2°",
+        "Entropía de Shannon del voto (fragmentación)",
+        "(Blancos + Nulos) / votos emitidos",
+        "Urbano / Rural / Exterior (derivado de ZONA)"
+    ],
+    "Nivel": ["Mesa","Mesa","Mesa","Mesa","Mesa/Mun","Mesa","Mesa"],
+    "Uso": [
+        "Normalización entre mesas",
+        "Comparar mesas con distinto total",
+        "Mapa de ganadores a nivel micro",
+        "Índice de competitividad",
+        "Concentración vs pluralismo",
+        "Proxy de descontento",
+        "Segmentación territorial"
+    ]
+})
+
+display(vars_df.style
+    .set_table_styles([
+        {"selector": "thead th",
+         "props": [("background-color","#1C1C28"),("color","#F5C518"),
+                   ("font-size","0.82em"),("border-bottom","1px solid #2A2A3A")]},
+        {"selector": "tbody td",
+         "props": [("background-color","#12121A"),("color","#E8E6E0"),
+                   ("font-size","0.82em"),("border-bottom","1px solid #1C1C28")]},
+    ])
+    .hide(axis="index")
+)
+```
+
+---
+
+## {background-color="#0A0A0F"}
+
+```{python}
+#| fig-align: center
+
+fig, ax = plt.subplots(figsize=(13, 5.2), facecolor=COL_BG)
+ax.set_visible(False)
+
+# Degradado sutil en la parte inferior
+from matplotlib.patches import Rectangle
+from matplotlib.collections import PatchCollection
+for alpha, y in zip(np.linspace(0, 0.06, 20), np.linspace(0, 0.4, 20)):
+    rect = Rectangle((0, y), 1, 0.02, color=COL_AMARILLO,
+                      alpha=alpha, transform=fig.transFigure, clip_on=False)
+    fig.add_patch(rect)
+
+# Franja bandera
+for i, color in enumerate([COL_AMARILLO, COL_AZUL, COL_ROJO]):
+    rect = mpatches.FancyBboxPatch((0.01, 0.1+i*0.028), 0.006, 0.022,
+                                    boxstyle="round,pad=0.001",
+                                    facecolor=color, transform=fig.transFigure, clip_on=False)
+    fig.add_patch(rect)
+
+line = plt.Line2D([0.03, 0.03], [0.08, 0.95],
+                   color=COL_AMARILLO, linewidth=3,
+                   transform=fig.transFigure, clip_on=False)
+fig.add_artist(line)
+
+fig.text(0.05, 0.86, "Propuesta lista",
+         fontsize=40, fontweight="bold", color=COL_TEXT,
+         transform=fig.transFigure)
+fig.text(0.05, 0.73, "para el 31 de Mayo de 2026",
+         fontsize=40, fontweight="bold", color=COL_AMARILLO,
+         transform=fig.transFigure)
+
+fig.text(0.05, 0.55,
+         '"Los datos electorales a nivel de mesa son el microscopio de la democracia.\n'
+         ' Cada fila es un grupo de ciudadanos que tomó una decisión."',
+         fontsize=11, color=COL_MUTED, transform=fig.transFigure,
+         fontstyle="italic", linespacing=1.5)
+
+# Tags
+info = [("Datos", "Registraduría Nacional"), ("Formato", "Quarto · RevealJS"),
+        ("Asignatura", "Estadística Descriptiva")]
+for i, (k, v) in enumerate(info):
+    x = 0.05 + i * 0.28
+    rect = mpatches.FancyBboxPatch((x, 0.12), 0.25, 0.12,
+                                    boxstyle="round,pad=0.01",
+                                    facecolor=COL_SURFACE, edgecolor="#2A2A3A",
+                                    transform=fig.transFigure, clip_on=False)
+    fig.add_patch(rect)
+    fig.text(x + 0.125, 0.205, k, ha="center", fontsize=8,
+             color=COL_AMARILLO, fontweight="bold", transform=fig.transFigure)
+    fig.text(x + 0.125, 0.155, v, ha="center", fontsize=8,
+             color=COL_MUTED, transform=fig.transFigure, fontfamily="monospace")
+
+plt.tight_layout()
+plt.show()
+```

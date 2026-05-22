@@ -1,0 +1,213 @@
+/*-- scss:defaults --*/
+
+// Paleta Colombia
+$col-amarillo:  #F5C518;
+$col-azul:      #003087;
+$col-rojo:      #CE1126;
+$col-bg:        #0A0A0F;
+$col-surface:   #1C1C28;
+$col-text:      #E8E6E0;
+$col-muted:     #7A7A8C;
+
+$backgroundColor:   $col-bg;
+$mainColor:         $col-text;
+$headingColor:      $col-text;
+$linkColor:         $col-amarillo;
+$selectionBackgroundColor: rgba(245, 197, 24, 0.2);
+
+$mainFont:       'DM Mono', 'Courier New', monospace;
+$headingFont:    'Syne', 'Arial Black', sans-serif;
+$codeFont:       'DM Mono', monospace;
+
+$mainFontSize:   24px;
+$headingTextTransform: none;
+$headingFontWeight: 800;
+
+/*-- scss:rules --*/
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+// ── Fondo general ──────────────────────────────────────────────
+.reveal-viewport {
+  background: $col-bg;
+}
+
+// ── Slides ────────────────────────────────────────────────────
+.reveal .slides section {
+  text-align: left;
+  padding: 30px 55px;
+}
+
+// ── Headings ──────────────────────────────────────────────────
+.reveal h1, .reveal h2, .reveal h3 {
+  font-family: $headingFont;
+  font-weight: 800;
+  color: $col-text;
+  text-transform: none;
+  line-height: 1.1;
+}
+
+.reveal h2 {
+  font-size: 1.6em;
+  margin-bottom: 20px;
+  color: $col-text;
+  &::after {
+    content: '';
+    display: block;
+    margin-top: 10px;
+    height: 2px;
+    width: 60px;
+    background: linear-gradient(90deg, $col-amarillo, transparent);
+  }
+}
+
+.reveal h3 {
+  font-size: 1.4em;
+  color: $col-text;
+}
+
+// ── Texto ─────────────────────────────────────────────────────
+.reveal p, .reveal li {
+  font-family: $mainFont;
+  color: $col-text;
+  font-size: 0.85em;
+  line-height: 1.7;
+}
+
+.reveal strong {
+  color: $col-amarillo;
+  font-weight: 700;
+}
+
+// ── Tablas ────────────────────────────────────────────────────
+.reveal table {
+  font-family: $mainFont;
+  font-size: 0.72em;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.reveal table th {
+  background: rgba(245, 197, 24, 0.12);
+  color: $col-amarillo;
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(245, 197, 24, 0.2);
+}
+
+.reveal table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: $col-text;
+}
+
+.reveal table tr:hover td {
+  background: rgba(255,255,255,0.02);
+}
+
+// ── Code blocks ───────────────────────────────────────────────
+.reveal pre {
+  background: $col-surface;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 6px;
+  font-size: 0.68em;
+  box-shadow: none;
+}
+
+.reveal code {
+  font-family: $codeFont;
+  color: #4CC9F0;
+  background: rgba(76, 201, 240, 0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+// ── Callouts ──────────────────────────────────────────────────
+.callout {
+  border-radius: 6px !important;
+  border-left-width: 3px !important;
+  background: $col-surface !important;
+  font-size: 0.78em;
+}
+
+.callout-tip {
+  border-color: #7BFF8B !important;
+  .callout-title { color: #7BFF8B !important; }
+}
+
+.callout-note {
+  border-color: #4CC9F0 !important;
+  .callout-title { color: #4CC9F0 !important; }
+}
+
+.callout-warning {
+  border-color: $col-amarillo !important;
+  .callout-title { color: $col-amarillo !important; }
+}
+
+// ── Footer ────────────────────────────────────────────────────
+.reveal .footer {
+  font-family: $mainFont;
+  font-size: 0.55em;
+  color: $col-muted;
+}
+
+// ── Progress bar ──────────────────────────────────────────────
+.reveal .progress {
+  background: rgba(255,255,255,0.05);
+  height: 3px;
+}
+
+.reveal .progress span {
+  background: $col-amarillo;
+}
+
+// ── Controls ──────────────────────────────────────────────────
+.reveal .controls button {
+  color: $col-amarillo;
+}
+
+// ── Slide numbers ─────────────────────────────────────────────
+.reveal .slide-number {
+  font-family: $mainFont;
+  color: $col-muted;
+  font-size: 0.55em;
+  background: transparent;
+}
+
+// ── Columns ───────────────────────────────────────────────────
+.reveal .columns {
+  gap: 30px;
+}
+
+// ── Incremental lists ─────────────────────────────────────────
+.reveal .slides section .incremental li {
+  opacity: 0.25;
+  transition: opacity 0.3s ease;
+}
+
+.reveal .slides section .incremental li.visible {
+  opacity: 1;
+}
+
+// ── Sección divider background ────────────────────────────────
+section[data-background-color="#12121A"] {
+  h3 { font-size: 2.2em !important; line-height: 1.1; }
+  p  { font-size: 0.9em !important; }
+}
+
+// ── Blockquote ────────────────────────────────────────────────
+.reveal blockquote {
+  background: $col-surface;
+  border-left: 3px solid $col-amarillo;
+  border-radius: 4px;
+  padding: 12px 18px;
+  font-style: italic;
+  color: $col-muted;
+  font-size: 0.82em;
+  box-shadow: none;
+  width: 95%;
+}

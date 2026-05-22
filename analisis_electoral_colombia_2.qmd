@@ -1,0 +1,944 @@
+---
+title: "Análisis Electoral Colombia"
+subtitle: "Propuesta Descriptiva y Exploratoria — Primera Vuelta 2022 → 2026"
+author: "Estadística Descriptiva"
+date: "Mayo 2026"
+format:
+  revealjs:
+    theme: [dark, custom.scss]
+    slide-number: c/t
+    transition: fade
+    transition-speed: fast
+    progress: true
+    controls: true
+    width: 1280
+    height: 720
+    margin: 0.05
+    footer: "Registraduría Nacional del Estado Civil · Primera Vuelta 2022"
+    logo: ""
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(scales)
+library(kableExtra)
+library(gridExtra)
+
+# ── Paleta Colombia ───────────────────────────────────────────
+COL_AMARILLO <- "#F5C518"
+COL_AZUL     <- "#003087"
+COL_ROJO     <- "#CE1126"
+COL_BG       <- "#0A0A0F"
+COL_SURFACE  <- "#1C1C28"
+COL_SURFACE2 <- "#12121A"
+COL_TEXT     <- "#E8E6E0"
+COL_MUTED    <- "#7A7A8C"
+
+C_PETRO      <- "#FF6B6B"
+C_GUTIERREZ  <- "#4FC3F7"
+C_HERNANDEZ  <- "#F5C518"
+C_FAJARDO    <- "#7BFF8B"
+C_BLANCO     <- "#9E9E9E"
+
+col_cand <- c(
+  "Petro"           = C_PETRO,
+  "Gutiérrez"       = C_GUTIERREZ,
+  "Hernández"       = C_HERNANDEZ,
+  "Fajardo"         = C_FAJARDO,
+  "J.M. Rodríguez"  = "#E040FB",
+  "Betancourt"      = "#FF9800",
+  "L. Pérez"        = "#26C6DA"
+)
+
+# ── Tema ggplot2 base oscuro ──────────────────────────────────
+theme_col <- function() {
+  theme_minimal(base_family = "mono") +
+  theme(
+    plot.background    = element_rect(fill = COL_BG,      color = NA),
+    panel.background   = element_rect(fill = COL_SURFACE, color = NA),
+    panel.grid.major   = element_line(color = "#2A2A3A",  linewidth = 0.4),
+    panel.grid.minor   = element_blank(),
+    axis.text          = element_text(color = COL_MUTED,  size = 9),
+    axis.title         = element_text(color = COL_MUTED,  size = 10),
+    plot.title         = element_text(color = COL_TEXT,   size = 11,
+                                      face = "bold", hjust = 0),
+    plot.subtitle      = element_text(color = COL_MUTED,  size = 9,
+                                      hjust = 0),
+    legend.background  = element_rect(fill = COL_SURFACE, color = NA),
+    legend.text        = element_text(color = COL_TEXT,   size = 9),
+    legend.title       = element_text(color = COL_MUTED,  size = 9),
+    strip.text         = element_text(color = COL_TEXT,   size = 9),
+    strip.background   = element_rect(fill = COL_SURFACE2, color = NA)
+  )
+}
+
+# ── Datos CSV (extracto provisto) ────────────────────────────
+csv_text <- "DEP;DEPNOMBRE;MUN;MUNNOMBRE;ZONA;PUESTO;PUESNOMBRE;MESA;CORCODIGO;CORNOMBRE;CIR;PAR;PARNOMBRE;CAN;CANNOMBRE;VOTOS
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;3
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;2
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;53
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;13
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;4
+88;CONSULADOS;120;ALEMANIA;05;02;BERLIN CONSULADO;004;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;20
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;0304;PARTIDO VERDE OXIGENO;008;INGRID BETANCOURT;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;87
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;8
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;022;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;15
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;021;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;8
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;021;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;16
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;021;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;021;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;17
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;22
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;020;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;0527;COLOMBIA PIENSA EN GRANDE;007;LUIS PÉREZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;22
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;018;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;6
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;11
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;2
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;138
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;8
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;10
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;013;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;5
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;123
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;9
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;6
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;010;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;8
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;3
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;55
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;008;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;66
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;15
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;13
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;28
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;0997;VOTOS NULOS;997;VOTOS NULOS;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;005;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;3
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;14
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;0997;VOTOS NULOS;997;VOTOS NULOS;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;3
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;71
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;20
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;27
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;004;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;9
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;2
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;0527;COLOMBIA PIENSA EN GRANDE;007;LUIS PÉREZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;43
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;9
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;33
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;003;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;59
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;0997;VOTOS NULOS;997;VOTOS NULOS;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;15
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;48
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;0014;COLOMBIA JUSTA LIBRES;002;JOHN MILTON RODRÍGUEZ;4
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;002;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;16
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;1234;COALICION EQUIPO POR COLOMBIA;003;FEDERICO GUTIÉRREZ;34
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;19
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;1
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;69
+88;CONSULADOS;155;ARGENTINA;05;02;BUENOS AIRES CONSULADO;001;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;7
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;1076;LIGA DE GOBERNANTES ANTICORRUPCION;001;RODOLFO HERNÁNDEZ;34
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;0996;VOTOS EN BLANCO;996;VOTOS EN BLANCO;1
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;0527;COLOMBIA PIENSA EN GRANDE;007;LUIS PÉREZ;1
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;1235;COALICION PACTO HISTÓRICO;006;GUSTAVO PETRO;28
+88;CONSULADOS;140;CURAZAO;10;02;WILLEMSTAD CONSULADO;002;01;PRESIDENTE;00;1233;COALICION CENTRO ESPERANZA;004;SERGIO FAJARDO;3"
+
+df_raw <- read_delim(csv_text, delim = ";", show_col_types = FALSE) |>
+  mutate(VOTOS = as.integer(VOTOS))
+
+# Nombres cortos
+nombre_corto <- c(
+  "GUSTAVO PETRO"         = "Petro",
+  "FEDERICO GUTIÉRREZ"    = "Gutiérrez",
+  "RODOLFO HERNÁNDEZ"     = "Hernández",
+  "SERGIO FAJARDO"        = "Fajardo",
+  "JOHN MILTON RODRÍGUEZ" = "J.M. Rodríguez",
+  "INGRID BETANCOURT"     = "Betancourt",
+  "LUIS PÉREZ"            = "L. Pérez"
+)
+
+ESPECIALES <- c(996L, 997L)
+
+df_val <- df_raw |>
+  filter(!CAN %in% ESPECIALES) |>
+  mutate(CAND_CORTO = coalesce(nombre_corto[CANNOMBRE], CANNOMBRE))
+
+df_esp <- df_raw |>
+  filter(CAN %in% ESPECIALES)
+
+# Pivot por mesa: una fila = una mesa
+mesa_pivot <- df_val |>
+  group_by(DEP, MUN, MUNNOMBRE, PUESTO, PUESNOMBRE, MESA, CAND_CORTO) |>
+  summarise(VOTOS = sum(VOTOS), .groups = "drop") |>
+  pivot_wider(names_from = CAND_CORTO, values_from = VOTOS, values_fill = 0)
+
+cands_ok <- intersect(
+  c("Petro","Gutiérrez","Hernández","Fajardo","J.M. Rodríguez","Betancourt","L. Pérez"),
+  names(mesa_pivot)
+)
+
+mesa_pivot <- mesa_pivot |>
+  mutate(
+    total_validos = rowSums(across(all_of(cands_ok))),
+    ganador       = cands_ok[max.col(across(all_of(cands_ok)), ties.method = "first")]
+  )
+
+for (c in cands_ok) {
+  mesa_pivot[[paste0("pct_", c)]] <- mesa_pivot[[c]] / mesa_pivot$total_validos * 100
+}
+```
+
+## {background-color="#0A0A0F"}
+
+```{r}
+#| fig-align: center
+#| fig-width: 13
+#| fig-height: 5.5
+
+# Portada con ggplot2 anotada
+p <- ggplot() +
+  # Fondo completo
+  annotate("rect", xmin=0, xmax=13, ymin=0, ymax=5.5,
+           fill=COL_BG, color=NA) +
+  # Línea acento izquierda
+  annotate("segment", x=0.35, xend=0.35, y=0.3, yend=5.3,
+           color=COL_AMARILLO, linewidth=2.5) +
+  # Franjas bandera
+  annotate("rect", xmin=0.1, xmax=0.28, ymin=2.2, ymax=2.55,
+           fill=COL_AMARILLO, color=NA) +
+  annotate("rect", xmin=0.1, xmax=0.28, ymin=1.8, ymax=2.15,
+           fill=COL_AZUL, color=NA) +
+  annotate("rect", xmin=0.1, xmax=0.28, ymin=1.4, ymax=1.75,
+           fill=COL_ROJO,  color=NA) +
+  # Eyebrow
+  annotate("text", x=0.55, y=5.1,
+           label="ESTADÍSTICA DESCRIPTIVA  ·  ANÁLISIS EXPLORATORIO DE DATOS",
+           color=COL_AMARILLO, size=3, hjust=0, family="mono") +
+  # Título
+  annotate("text", x=0.55, y=4.15,
+           label="Elecciones Presidenciales\nColombia 2022",
+           color=COL_TEXT, size=13, fontface="bold", hjust=0, lineheight=1.1) +
+  # Subtítulo
+  annotate("text", x=0.55, y=2.85,
+           label="Propuesta de análisis descriptivo y exploratorio\nde los resultados de primera vuelta — mesa por mesa",
+           color=COL_MUTED, size=4.2, hjust=0, lineheight=1.5) +
+  # Métricas
+  annotate("text", x=c(0.6,3.5,6.4,9.3), y=rep(1.55,4),
+           label=c("33 M","105 K+","8","31 May 2026"),
+           color=COL_AMARILLO, size=7, fontface="bold", hjust=0) +
+  annotate("text", x=c(0.6,3.5,6.4,9.3), y=rep(1.1,4),
+           label=c("Votos emitidos","Mesas de votación","Candidatos","Primera vuelta 2026"),
+           color=COL_MUTED, size=3, hjust=0, family="mono") +
+  coord_cartesian(xlim=c(0,13), ylim=c(0,5.5), expand=FALSE) +
+  theme_void() +
+  theme(plot.background = element_rect(fill=COL_BG, color=NA))
+
+print(p)
+```
+
+## Contenido de la Presentación
+
+::: columns
+::: {.column width="50%"}
+**01 · La Base de Datos**
+Estructura, variables, granularidad y calidad del dataset de la Registraduría
+
+**02 · Análisis Univariado**
+Distribuciones, medidas de posición y dispersión por candidato, zona y mesa
+:::
+::: {.column width="50%"}
+**03 · Análisis Bivariado**
+Correlaciones, comparaciones entre candidatos y patrones geográficos
+
+**04 · Hipótesis y Metodología**
+Preguntas exploratorias, herramientas y hoja de ruta para el trabajo final
+:::
+:::
+
+---
+
+## {background-color="#12121A"}
+
+<br>
+
+::: {style="font-size: 5em; font-weight: 900; color: rgba(245,197,24,0.12); position: absolute; right: 60px; top: 40px;"}
+01
+:::
+
+::: {style="color: #F5C518; font-family: monospace; font-size: 0.8em; letter-spacing: 0.2em; margin-bottom: 16px;"}
+▸ SECCIÓN
+:::
+
+### [La Base de Datos]{style="color: #E8E6E0;"}
+
+La estructura del archivo de la Registraduría a nivel de mesa de votación
+
+---
+
+## Diccionario de Variables
+
+| Campo | Descripción | Tipo | Ejemplo |
+|-------|-------------|------|---------|
+| `DEP` / `DEPNOMBRE` | Departamento | Categórica | 88 / CONSULADOS |
+| `MUN` / `MUNNOMBRE` | Municipio o país | Categórica | 155 / ARGENTINA |
+| `ZONA` | Zona electoral | Categórica | 05, 10 |
+| `PUESTO` / `PUESNOMBRE` | Puesto de votación | Categórica | 02 / BUENOS AIRES |
+| `MESA` | Mesa dentro del puesto | Categórica | 001 – 022 |
+| `PARNOMBRE` | Partido / coalición | Categórica | PACTO HISTÓRICO |
+| `CANNOMBRE` | Nombre del candidato | Categórica | GUSTAVO PETRO |
+| `VOTOS` | Votos en esa mesa para ese candidato | **Numérica** | 53, 138 |
+
+::: {.callout-warning}
+`CAN=996` (Votos en Blanco) y `CAN=997` (Votos Nulos) aparecen como candidatos — deben filtrarse antes del análisis con `filter(!CAN %in% c(996, 997))`.
+:::
+
+---
+
+## Estructura del Dataset
+
+::: columns
+::: {.column width="55%"}
+**Formato largo** (long format)
+
+Cada fila = 1 candidato × 1 mesa
+
+Para análisis por mesa → **pivot a formato ancho**
+
+```r
+library(tidyverse)
+
+df <- read_delim("resultados_1v.csv", delim = ";")
+
+# Separar votos especiales
+validos <- df |>
+  filter(!CAN %in% c(996, 997))
+
+# Pivot a formato ancho
+mesa_df <- validos |>
+  pivot_wider(
+    id_cols    = c(DEP, MUN, PUESTO, MESA),
+    names_from  = CANNOMBRE,
+    values_from = VOTOS,
+    values_fn   = sum,
+    values_fill = 0
+  )
+```
+:::
+::: {.column width="45%"}
+
+**Variables derivadas propuestas:**
+
+- `total_validos` — suma votos válidos por mesa
+- `pct_[candidato]` — participación relativa normalizada
+- `ganador_mesa` — candidato con más votos
+- `margen_victoria` — diferencia entre 1° y 2°
+- `indice_shannon` — entropía del voto (fragmentación)
+- `pct_blanco_nulo` — proxy de descontento
+
+:::
+:::
+
+---
+
+## {background-color="#12121A"}
+
+::: {style="font-size: 5em; font-weight: 900; color: rgba(245,197,24,0.12); position: absolute; right: 60px; top: 40px;"}
+02
+:::
+
+::: {style="color: #F5C518; font-family: monospace; font-size: 0.8em; letter-spacing: 0.2em; margin-bottom: 16px;"}
+▸ SECCIÓN
+:::
+
+### [Análisis Univariado]{style="color: #E8E6E0;"}
+
+Distribuciones individuales de las variables clave
+
+---
+
+## Resumen Nacional — Primera Vuelta 2022
+
+```{r}
+#| fig-align: center
+#| fig-width: 11
+#| fig-height: 4.2
+
+nac <- tibble(
+  candidato = c("Petro","Gutiérrez","Hernández","Fajardo",
+                "Betancourt","J.M. Rodríguez","L. Pérez"),
+  votos     = c(4480609, 3137108, 2650291, 467051, 210848, 93042, 52409),
+  pct       = c(40.32, 28.15, 23.87, 4.20, 1.90, 0.84, 0.47)
+) |>
+  mutate(
+    candidato = factor(candidato, levels = rev(candidato)),
+    color     = col_cand[as.character(candidato)]
+  )
+
+ggplot(nac, aes(x = votos / 1e6, y = candidato, fill = candidato)) +
+  geom_col(width = 0.65, show.legend = FALSE) +
+  geom_text(aes(label = paste0(pct, "%"), x = votos / 1e6 + 0.05),
+            hjust = 0, color = COL_TEXT, size = 3.8, family = "mono") +
+  scale_fill_manual(values = setNames(nac$color, nac$candidato)) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.15)),
+                     labels = label_number(suffix = " M")) +
+  labs(
+    title    = "Resultados Nacionales — Primera Vuelta 31 Mayo 2022",
+    subtitle = "Votos válidos en millones",
+    x = "Millones de votos", y = NULL
+  ) +
+  theme_col()
+```
+
+---
+
+## Distribución de Votos por Mesa
+
+```{r}
+#| fig-align: center
+#| fig-width: 12
+#| fig-height: 4.5
+
+# Panel 1: Histograma total votos/mesa
+p1 <- ggplot(mesa_pivot, aes(x = total_validos)) +
+  geom_histogram(bins = 8, fill = COL_AMARILLO, alpha = 0.85,
+                 color = COL_BG, linewidth = 0.4) +
+  geom_vline(aes(xintercept = mean(total_validos), linetype = "Media"),
+             color = C_PETRO, linewidth = 1.2) +
+  geom_vline(aes(xintercept = median(total_validos), linetype = "Mediana"),
+             color = C_FAJARDO, linewidth = 1.2) +
+  scale_linetype_manual(
+    name   = NULL,
+    values = c("Media" = "dashed", "Mediana" = "dotted"),
+    guide  = guide_legend(override.aes = list(color = c(C_PETRO, C_FAJARDO)))
+  ) +
+  labs(title = "Votos totales / mesa", x = "Votos válidos", y = "Frecuencia") +
+  theme_col() +
+  theme(legend.position = c(0.75, 0.85),
+        legend.background = element_rect(fill = COL_SURFACE, color = NA))
+
+# Panel 2: Boxplot por candidato
+cands_box <- intersect(c("Petro","Gutiérrez","Hernández","Fajardo"), names(mesa_pivot))
+df_box <- mesa_pivot |>
+  select(all_of(cands_box)) |>
+  pivot_longer(everything(), names_to = "candidato", values_to = "votos") |>
+  mutate(candidato = factor(candidato, levels = cands_box))
+
+p2 <- ggplot(df_box, aes(x = candidato, y = votos, fill = candidato)) +
+  geom_boxplot(alpha = 0.75, outlier.color = COL_MUTED,
+               outlier.size = 1.5, show.legend = FALSE) +
+  scale_fill_manual(values = col_cand[cands_box]) +
+  labs(title = "Distribución votos / mesa\npor candidato",
+       x = NULL, y = "Votos en la mesa") +
+  theme_col()
+
+# Panel 3: Ganador por mesa (torta)
+gan_counts <- mesa_pivot |>
+  count(ganador) |>
+  mutate(
+    pct   = n / sum(n),
+    color = col_cand[ganador],
+    label = paste0(ganador, "\n", percent(pct, accuracy = 1))
+  )
+
+p3 <- ggplot(gan_counts, aes(x = "", y = pct, fill = ganador)) +
+  geom_col(width = 1, color = COL_BG, linewidth = 0.8) +
+  geom_text(aes(label = label),
+            position = position_stack(vjust = 0.5),
+            color = "white", size = 3, family = "mono") +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = setNames(gan_counts$color, gan_counts$ganador)) +
+  labs(title = "Ganador por mesa\n(extracto)") +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = COL_BG, color = NA),
+    plot.title      = element_text(color = COL_TEXT, size = 11,
+                                   face = "bold", hjust = 0.5),
+    legend.position = "none"
+  )
+
+grid.arrange(p1, p2, p3, ncol = 3,
+             top = grid::textGrob(
+               "Análisis Univariado — Extracto de datos (consulados)",
+               gp = grid::gpar(col = COL_TEXT, fontsize = 11,
+                               fontface = "bold", fontfamily = "mono")
+             ))
+```
+
+---
+
+## Estadísticas Descriptivas por Mesa
+
+```{r}
+cands_desc <- intersect(c("Petro","Gutiérrez","Hernández","Fajardo"), names(mesa_pivot))
+
+desc_tbl <- mesa_pivot |>
+  select(total_validos, all_of(cands_desc)) |>
+  summarise(across(everything(), list(
+    Media    = \(x) round(mean(x),   1),
+    Mediana  = \(x) round(median(x), 1),
+    `Desv.Std` = \(x) round(sd(x),  1),
+    Mín      = \(x) min(x),
+    Máx      = \(x) max(x)
+  ))) |>
+  pivot_longer(everything(),
+               names_to  = c("Variable", "Estadístico"),
+               names_sep = "_") |>
+  pivot_wider(names_from = "Estadístico", values_from = "value")
+
+desc_tbl |>
+  kbl(align = c("l","r","r","r","r","r")) |>
+  kable_styling(
+    bootstrap_options = c("striped","hover","condensed"),
+    full_width = TRUE, font_size = 15
+  ) |>
+  row_spec(0, background = "#1C1C28", color = "#F5C518", bold = TRUE) |>
+  row_spec(seq_len(nrow(desc_tbl)), background = "#12121A", color = "#E8E6E0") |>
+  column_spec(1, bold = TRUE, color = COL_AMARILLO)
+```
+
+::: {.callout-note}
+**Coeficiente de variación** = Desv.Std / Media — mide la dispersión relativa entre mesas. Petro muestra la mayor variabilidad absoluta en este extracto.
+:::
+
+---
+
+## Votos Blancos y Nulos — Análisis Especial
+
+```{r}
+#| fig-align: center
+#| fig-width: 11
+#| fig-height: 4
+
+# Panel izquierdo: blancos y nulos por consulado
+esp_resumen <- df_esp |>
+  group_by(MUNNOMBRE, CANNOMBRE) |>
+  summarise(VOTOS = sum(VOTOS), .groups = "drop")
+
+p_esp1 <- ggplot(esp_resumen,
+                 aes(x = MUNNOMBRE, y = VOTOS, fill = CANNOMBRE)) +
+  geom_col(position = "stack", color = COL_BG, linewidth = 0.4) +
+  scale_fill_manual(
+    values = c("VOTOS EN BLANCO" = COL_MUTED, "VOTOS NULOS" = C_PETRO),
+    name   = NULL
+  ) +
+  labs(title = "Votos especiales por consulado",
+       x = NULL, y = "Votos") +
+  theme_col() +
+  theme(axis.text.x  = element_text(angle = 15, hjust = 1),
+        legend.position = "top")
+
+# Panel derecho: % blancos+nulos sobre total emitido
+total_esp  <- df_esp  |> group_by(MUNNOMBRE) |> summarise(esp  = sum(VOTOS))
+total_emit <- df_raw  |> group_by(MUNNOMBRE) |> summarise(emit = sum(VOTOS))
+
+pct_esp <- total_esp |>
+  left_join(total_emit, by = "MUNNOMBRE") |>
+  mutate(pct = esp / emit * 100) |>
+  arrange(pct) |>
+  mutate(
+    MUNNOMBRE = factor(MUNNOMBRE, levels = MUNNOMBRE),
+    color     = if_else(pct > median(pct), C_PETRO, COL_AMARILLO)
+  )
+
+mediana_pct <- median(pct_esp$pct)
+
+p_esp2 <- ggplot(pct_esp, aes(x = pct, y = MUNNOMBRE, fill = color)) +
+  geom_col(show.legend = FALSE, color = COL_BG, linewidth = 0.4) +
+  geom_vline(xintercept = mediana_pct, color = "white",
+             linetype = "dashed", linewidth = 0.8) +
+  scale_fill_identity() +
+  annotate("text", x = mediana_pct + 0.05, y = 0.7,
+           label = paste0("Mediana: ", round(mediana_pct, 1), "%"),
+           color = "white", size = 3, hjust = 0, family = "mono") +
+  labs(title = "% Votos blancos+nulos\nsobre total emitidos",
+       x = "% del total", y = NULL) +
+  theme_col()
+
+grid.arrange(p_esp1, p_esp2, ncol = 2,
+             top = grid::textGrob(
+               "Análisis de Votos No Válidos — Proxy de Descontento Electoral",
+               gp = grid::gpar(col = COL_TEXT, fontsize = 11,
+                               fontface = "bold", fontfamily = "mono")
+             ))
+```
+
+---
+
+## {background-color="#12121A"}
+
+::: {style="font-size: 5em; font-weight: 900; color: rgba(245,197,24,0.12); position: absolute; right: 60px; top: 40px;"}
+03
+:::
+
+::: {style="color: #F5C518; font-family: monospace; font-size: 0.8em; letter-spacing: 0.2em; margin-bottom: 16px;"}
+▸ SECCIÓN
+:::
+
+### [Análisis Bivariado]{style="color: #E8E6E0;"}
+
+Correlaciones, comparaciones geográficas y patrones de votación
+
+---
+
+## Correlaciones entre Candidatos — Por Mesa
+
+```{r}
+#| fig-align: center
+#| fig-width: 7
+#| fig-height: 4.5
+
+cands_corr <- intersect(c("Petro","Gutiérrez","Hernández","Fajardo"), names(mesa_pivot))
+
+corr_mat <- mesa_pivot |>
+  select(all_of(cands_corr)) |>
+  cor(use = "complete.obs") |>
+  round(2)
+
+corr_long <- corr_mat |>
+  as.data.frame() |>
+  rownames_to_column("var1") |>
+  pivot_longer(-var1, names_to = "var2", values_to = "corr") |>
+  mutate(
+    var1 = factor(var1, levels = cands_corr),
+    var2 = factor(var2, levels = cands_corr)
+  )
+
+ggplot(corr_long, aes(x = var2, y = var1, fill = corr)) +
+  geom_tile(color = COL_BG, linewidth = 1.2) +
+  geom_text(aes(label = corr,
+                color  = if_else(abs(corr) > 0.4, "white", COL_TEXT)),
+            size = 5, fontface = "bold", family = "mono") +
+  scale_fill_gradient2(
+    low      = C_PETRO,
+    mid      = COL_SURFACE,
+    high     = C_FAJARDO,
+    midpoint = 0,
+    limits   = c(-1, 1),
+    name     = "Pearson r"
+  ) +
+  scale_color_identity() +
+  coord_fixed() +
+  labs(
+    title    = "Correlación de Pearson entre candidatos",
+    subtitle = "Votos absolutos por mesa — extracto consulados",
+    x = NULL, y = NULL
+  ) +
+  theme_col() +
+  theme(panel.grid = element_blank(),
+        legend.position = "right")
+```
+
+::: {.callout-tip}
+Con el dataset completo se esperaría una **correlación negativa** fuerte entre Petro y Gutiérrez — electorados opuestos en el espectro político.
+:::
+
+---
+
+## Caso de Estudio: Voto en el Exterior
+
+```{r}
+#| fig-align: center
+#| fig-width: 11
+#| fig-height: 4.2
+
+ext_pct <- df_val |>
+  group_by(MUNNOMBRE, CAND_CORTO) |>
+  summarise(VOTOS = sum(VOTOS), .groups = "drop") |>
+  group_by(MUNNOMBRE) |>
+  mutate(pct = VOTOS / sum(VOTOS) * 100) |>
+  ungroup() |>
+  filter(CAND_CORTO %in% c("Petro","Gutiérrez","Hernández","Fajardo")) |>
+  mutate(CAND_CORTO = factor(CAND_CORTO,
+                              levels = c("Petro","Gutiérrez","Hernández","Fajardo")))
+
+ggplot(ext_pct, aes(x = MUNNOMBRE, y = pct,
+                     fill = CAND_CORTO,
+                     group = CAND_CORTO)) +
+  geom_col(position = position_dodge(width = 0.75),
+           width = 0.65, color = COL_BG, linewidth = 0.3) +
+  scale_fill_manual(values = col_cand[levels(ext_pct$CAND_CORTO)],
+                    name = NULL) +
+  scale_y_continuous(labels = label_percent(scale = 1)) +
+  labs(
+    title    = "Distribución del voto por país — Consulados (extracto)",
+    subtitle = "% sobre votos válidos en cada consulado",
+    x = NULL, y = "% votos válidos"
+  ) +
+  theme_col() +
+  theme(legend.position = "top",
+        axis.text.x = element_text(angle = 10, hjust = 1))
+```
+
+> Buenos Aires vota **~57% Petro**, Curazao vota **~51% Hernández** — patrones radicalmente distintos dentro del mismo segmento "exterior".
+
+---
+
+## Scatter: Petro vs Gutiérrez por Mesa
+
+```{r}
+#| fig-align: center
+#| fig-width: 8
+#| fig-height: 4.2
+
+if (all(c("Petro","Gutiérrez") %in% names(mesa_pivot))) {
+
+  lim <- max(mesa_pivot$Gutiérrez, mesa_pivot$Petro) * 1.1
+
+  ggplot(mesa_pivot, aes(x = Gutiérrez, y = Petro, color = ganador)) +
+    # Línea de igualdad
+    geom_abline(slope = 1, intercept = 0, color = COL_MUTED,
+                linetype = "dashed", linewidth = 0.7, alpha = 0.6) +
+    geom_point(size = 3.5, alpha = 0.80) +
+    # Etiquetas de mesas destacadas
+    geom_text(
+      data = mesa_pivot |> filter(Petro > 50 | Gutiérrez > 25),
+      aes(label = paste0("Mesa ", MESA, "\n", MUNNOMBRE)),
+      size = 2.5, vjust = -0.7, family = "mono", color = COL_MUTED,
+      show.legend = FALSE
+    ) +
+    scale_color_manual(values = col_cand, name = "Gana") +
+    scale_x_continuous(limits = c(0, lim)) +
+    scale_y_continuous(limits = c(0, lim)) +
+    labs(
+      title    = "Dispersión Petro vs Gutiérrez — cada punto = 1 mesa",
+      subtitle = "Extracto consulados · Los puntos por encima de la diagonal favorecen a Petro",
+      x = "Votos Gutiérrez (por mesa)",
+      y = "Votos Petro (por mesa)"
+    ) +
+    theme_col() +
+    theme(legend.position = c(0.85, 0.25),
+          legend.background = element_rect(fill = COL_SURFACE, color = NA))
+}
+```
+
+::: {.callout-tip}
+Con el dataset nacional, este gráfico permitiría identificar **mesas en disputa** (zona central) vs **mesas dominadas** (extremos del gráfico).
+:::
+
+---
+
+## {background-color="#12121A"}
+
+::: {style="font-size: 5em; font-weight: 900; color: rgba(245,197,24,0.12); position: absolute; right: 60px; top: 40px;"}
+04
+:::
+
+::: {style="color: #F5C518; font-family: monospace; font-size: 0.8em; letter-spacing: 0.2em; margin-bottom: 16px;"}
+▸ SECCIÓN
+:::
+
+### [Hipótesis y Metodología]{style="color: #E8E6E0;"}
+
+Preguntas exploratorias y hoja de ruta para el trabajo final
+
+---
+
+## Preguntas Exploratorias Clave
+
+::: incremental
+- **H1 · Geografía del voto progresista** — ¿El porcentaje de votos por Petro aumenta con el tamaño del municipio? → *`lm(pct_Petro ~ total_votos_mun)` + mapa coroplético*
+
+- **H2 · Varianza intra vs. inter municipal** — ¿Las mesas dentro de un mismo municipio votan de forma más homogénea que entre municipios? → *`aov(votos ~ municipio)` con test de Tukey*
+
+- **H3 · Voto exterior ≠ Interior** — ¿Los colombianos en el exterior votan de manera estadísticamente diferente al interior? → *`t.test()` o `wilcox.test()` para diferencia en medianas*
+
+- **H4 · Mesas anómalas** — ¿Existen mesas con patrones de votación estadísticamente atípicos? → *Z-score por departamento, distancia de Mahalanobis multivariada*
+:::
+
+---
+
+## Análisis Propuestos para el Trabajo Final
+
+| # | Análisis | Técnica en R | Nivel |
+|---|----------|-------------|-------|
+| 1 | Estadísticas descriptivas completas | `summarise()` + `skewness()` + `kurtosis()` | Mesa |
+| 2 | Mapas coropléticos interactivos | `leaflet` / `ggplot2` + `sf` | Municipal |
+| 3 | Clustering de municipios | `kmeans()` / `hclust()` | Municipal |
+| 4 | Detección de mesas atípicas | `mahalanobis()`, Z-score | Mesa |
+| 5 | Diáspora vs interior | `t.test()`, `wilcox.test()` | Segmento |
+| 6 | Índice de competitividad | Margen 1°–2° con `dplyr` | Municipal |
+| 7 | Entropía del voto | Índice de Shannon manual | Mesa/Mun |
+| 8 | Comparativa 2022 vs 2026 | `bind_rows()` + `Δ%` | Nacional |
+
+---
+
+## Hoja de Ruta Metodológica
+
+```{r}
+#| fig-align: center
+#| fig-width: 11
+#| fig-height: 3.8
+
+pasos <- tibble(
+  num    = c("01","02","03","04","05"),
+  titulo = c("Ingesta","Transform.","Univariado","Bivariado","Visualiz."),
+  desc   = c(
+    "read_delim()\nValidar tipos\nFiltrar CAN 996/997",
+    "pivot_wider()\nVariables derivadas\npct_, ganador, margen",
+    "Histogramas, KDE\nBoxplots\nsummary()",
+    "cor(), aov()\nScatter plots\nt.test()",
+    "ggplot2 + sf\nleaflet\nQuarto RevealJS"
+  ),
+  color  = c(COL_AMARILLO, C_GUTIERREZ, C_FAJARDO, C_PETRO, COL_MUTED)
+)
+
+n  <- nrow(pasos)
+xs <- seq(0.1, 0.9, length.out = n)
+
+p <- ggplot() +
+  coord_cartesian(xlim = c(0,1), ylim = c(0,1), expand = FALSE) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = COL_BG, color = NA))
+
+for (i in seq_len(n)) {
+  x <- xs[i]
+  # Caja
+  p <- p +
+    annotate("rect", xmin = x-0.082, xmax = x+0.082,
+             ymin = 0.12, ymax = 0.95,
+             fill = COL_SURFACE, color = pasos$color[i], linewidth = 1.5) +
+    # Número
+    annotate("text", x = x, y = 0.80,
+             label = pasos$num[i],
+             color = pasos$color[i], size = 10, fontface = "bold") +
+    # Título
+    annotate("text", x = x, y = 0.62,
+             label = pasos$titulo[i],
+             color = COL_TEXT, size = 4.5, fontface = "bold") +
+    # Descripción
+    annotate("text", x = x, y = 0.36,
+             label = pasos$desc[i],
+             color = COL_MUTED, size = 3, lineheight = 1.4)
+  # Flecha
+  if (i < n) {
+    p <- p +
+      annotate("text", x = (xs[i] + xs[i+1]) / 2, y = 0.545,
+               label = "→", color = COL_MUTED, size = 6)
+  }
+}
+
+# Pie de stack
+p <- p +
+  annotate("text", x = 0.5, y = 0.04,
+           label = "Stack: R · tidyverse · ggplot2 · sf · leaflet · kableExtra · Quarto",
+           color = COL_MUTED, size = 3, family = "mono")
+
+print(p)
+```
+
+---
+
+## Variables Derivadas Propuestas
+
+```{r}
+vars_tbl <- tibble(
+  Variable    = c("total_validos","pct_[candidato]","ganador_mesa",
+                  "margen_victoria","indice_shannon","pct_blanco_nulo","tipo_zona"),
+  Definición  = c(
+    "Suma votos válidos en la mesa",
+    "Votos candidato / total_validos × 100",
+    "Candidato con más votos en la mesa",
+    "Diferencia pct entre 1° y 2°",
+    "Entropía de Shannon del voto (fragmentación)",
+    "(Blancos + Nulos) / votos emitidos",
+    "Urbano / Rural / Exterior (derivado de ZONA)"
+  ),
+  Nivel       = c("Mesa","Mesa","Mesa","Mesa","Mesa/Mun","Mesa","Mesa"),
+  Uso         = c(
+    "Normalización entre mesas",
+    "Comparar mesas con distinto total",
+    "Mapa de ganadores a nivel micro",
+    "Índice de competitividad",
+    "Concentración vs pluralismo",
+    "Proxy de descontento",
+    "Segmentación territorial"
+  )
+)
+
+vars_tbl |>
+  kbl(align = c("l","l","c","l")) |>
+  kable_styling(
+    bootstrap_options = c("striped","hover","condensed"),
+    full_width = TRUE, font_size = 15
+  ) |>
+  row_spec(0, background = "#1C1C28", color = "#F5C518", bold = TRUE) |>
+  row_spec(seq_len(nrow(vars_tbl)), background = "#12121A", color = "#E8E6E0") |>
+  column_spec(1, bold = TRUE, color = COL_AMARILLO, monospace = TRUE)
+```
+
+---
+
+## {background-color="#0A0A0F"}
+
+```{r}
+#| fig-align: center
+#| fig-width: 13
+#| fig-height: 5.2
+
+p_cierre <- ggplot() +
+  # Fondo
+  annotate("rect", xmin=0, xmax=13, ymin=0, ymax=5.2,
+           fill = COL_BG, color = NA) +
+  # Degradado sutil inferior
+  annotate("rect", xmin=0, xmax=13, ymin=0, ymax=1.8,
+           fill = COL_AMARILLO, alpha = 0.04, color = NA) +
+  # Línea acento
+  annotate("segment", x=0.35, xend=0.35, y=0.3, yend=5.0,
+           color = COL_AMARILLO, linewidth = 2.5) +
+  # Franjas bandera
+  annotate("rect", xmin=0.08, xmax=0.27, ymin=2.3, ymax=2.65,
+           fill = COL_AMARILLO, color = NA) +
+  annotate("rect", xmin=0.08, xmax=0.27, ymin=1.9, ymax=2.25,
+           fill = COL_AZUL,    color = NA) +
+  annotate("rect", xmin=0.08, xmax=0.27, ymin=1.5, ymax=1.85,
+           fill = COL_ROJO,    color = NA) +
+  # Título
+  annotate("text", x=0.55, y=4.55,
+           label = "Propuesta lista",
+           color = COL_TEXT, size = 14, fontface = "bold", hjust = 0) +
+  annotate("text", x=0.55, y=3.75,
+           label = "para el 31 de Mayo de 2026",
+           color = COL_AMARILLO, size = 14, fontface = "bold", hjust = 0) +
+  # Cita
+  annotate("text", x=0.55, y=2.85,
+           label = '"Los datos electorales a nivel de mesa son el microscopio\n de la democracia. Cada fila es un grupo de ciudadanos\n que tomó una decisión."',
+           color = COL_MUTED, size = 3.8, hjust = 0,
+           fontface = "italic", lineheight = 1.5) +
+  # Cajas info
+  annotate("rect", xmin=0.55, xmax=3.7,  ymin=0.35, ymax=0.95,
+           fill = COL_SURFACE, color = "#2A2A3A", linewidth = 0.8) +
+  annotate("rect", xmin=4.0,  xmax=7.15, ymin=0.35, ymax=0.95,
+           fill = COL_SURFACE, color = "#2A2A3A", linewidth = 0.8) +
+  annotate("rect", xmin=7.45, xmax=10.6, ymin=0.35, ymax=0.95,
+           fill = COL_SURFACE, color = "#2A2A3A", linewidth = 0.8) +
+  annotate("text", x=c(2.12,5.57,9.02), y=rep(0.78,3),
+           label = c("Datos","Formato","Asignatura"),
+           color = COL_AMARILLO, size = 3.5, fontface = "bold") +
+  annotate("text", x=c(2.12,5.57,9.02), y=rep(0.54,3),
+           label = c("Registraduría Nacional","Quarto · RevealJS","Estadística Descriptiva"),
+           color = COL_MUTED, size = 3, family = "mono") +
+  coord_cartesian(xlim=c(0,13), ylim=c(0,5.2), expand=FALSE) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = COL_BG, color = NA))
+
+print(p_cierre)
+```

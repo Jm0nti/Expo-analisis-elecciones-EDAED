@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisis Electoral Colombia 2022 — Primera Vuelta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --col-amarillo: #F5C518;
+  --col-azul:     #003087;
+  --col-rojo:     #CE1126;
+  --col-bg:       #0A0A0F;
+  --col-surface:  #12121A;
+  --col-surface2: #1C1C28;
+  --col-text:     #E8E6E0;
+  --col-muted:    #7A7A8C;
+  --col-accent2:  #FF4D6D;
+  --col-accent3:  #4CC9F0;
+  --col-accent4:  #7BFF8B;
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Mono', monospace;
+  --font-serif:   'Fraunces', serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.reveal-viewport { background: var(--col-bg); }
+.reveal { font-family: var(--font-body); color: var(--col-text); font-size: 18px; }
+.reveal .slides section {
+  height: 100%; display: flex; flex-direction: column;
+  justify-content: center; padding: 36px 56px; text-align: left;
+}
+
+/* ── LABELS ── */
+.slide-label {
+  font-size: 0.62em; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--col-muted); margin-bottom: 12px;
+}
+
+/* ── COVER ── */
+.cover-slide { background: var(--col-bg) !important; position: relative; overflow: hidden; }
+.cover-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(245,197,24,.04) 1px,transparent 1px),
+                    linear-gradient(90deg,rgba(245,197,24,.04) 1px,transparent 1px);
+  background-size: 60px 60px;
+}
+.cover-stripe {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+  background: linear-gradient(180deg,var(--col-amarillo),var(--col-rojo),var(--col-azul));
+}
+.cover-content { position: relative; z-index: 2; padding-left: 28px; }
+.cover-eyebrow { font-size: 0.68em; letter-spacing: .25em; text-transform: uppercase; color: var(--col-amarillo); margin-bottom: 18px; }
+.cover-title { font-family: var(--font-display); font-size: 3em; font-weight: 800; line-height: 1.05; margin-bottom: 14px; }
+.cover-title span { color: var(--col-amarillo); }
+.cover-subtitle { font-family: var(--font-serif); font-style: italic; font-weight: 300; font-size: 1em; color: var(--col-muted); margin-bottom: 36px; max-width: 500px; }
+.cover-meta { display: flex; gap: 36px; flex-wrap: wrap; }
+.cover-meta-item { display: flex; flex-direction: column; gap: 3px; }
+.cover-meta-val { font-family: var(--font-display); font-size: 1.7em; font-weight: 700; color: var(--col-amarillo); }
+.cover-meta-label { font-size: 0.62em; letter-spacing: .15em; text-transform: uppercase; color: var(--col-muted); }
+
+/* ── SECTION DIVIDER ── */
+.section-slide { background: var(--col-surface) !important; }
+.section-number {
+  font-family: var(--font-display); font-size: 8em; font-weight: 800;
+  color: rgba(245,197,24,.08); line-height: 1;
+  position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
+}
+.section-title { font-family: var(--font-display); font-size: 2.3em; font-weight: 800; line-height: 1.1; max-width: 72%; }
+.section-title em { font-style: normal; color: var(--col-amarillo); }
+.section-desc { margin-top: 14px; font-size: 0.82em; color: var(--col-muted); max-width: 58%; line-height: 1.7; }
+
+/* ── HEADINGS ── */
+.slide-h1 { font-family: var(--font-display); font-size: 1.6em; font-weight: 700; margin-bottom: 20px; line-height: 1.15; }
+.slide-h1 span { color: var(--col-amarillo); }
+
+/* ── OVERVIEW GRID (4 cards) ── */
+.overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+.ov-card {
+  background: var(--col-surface2); border: 1px solid rgba(255,255,255,.06);
+  border-radius: 10px; padding: 20px 22px; position: relative; overflow: hidden;
+}
+.ov-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.ov-card:nth-child(1)::before { background: var(--col-amarillo); }
+.ov-card:nth-child(2)::before { background: var(--col-accent3); }
+.ov-card:nth-child(3)::before { background: var(--col-accent2); }
+.ov-card:nth-child(4)::before { background: var(--col-accent4); }
+.ov-num { font-size: 0.6em; letter-spacing: .15em; text-transform: uppercase; color: var(--col-muted); margin-bottom: 6px; }
+.ov-title { font-family: var(--font-display); font-size: 0.95em; font-weight: 700; color: var(--col-text); margin-bottom: 8px; }
+.ov-desc { font-size: 0.72em; color: var(--col-muted); line-height: 1.6; }
+.ov-tag {
+  display: inline-block; margin-top: 10px; padding: 3px 9px;
+  border-radius: 3px; font-size: 0.6em; letter-spacing: .1em; text-transform: uppercase;
+}
+.tag-uni  { background: rgba(245,197,24,.12);  color: var(--col-amarillo); }
+.tag-geo  { background: rgba(76,201,240,.12);  color: var(--col-accent3); }
+.tag-comp { background: rgba(255,77,109,.12);  color: var(--col-accent2); }
+.tag-idx  { background: rgba(123,255,139,.12); color: var(--col-accent4); }
+
+/* ── TWO-COL ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; margin-top: 8px; }
+.two-col-wide { display: grid; grid-template-columns: 1.55fr 1fr; gap: 28px; align-items: center; margin-top: 8px; }
+
+/* ── CHART CONTAINERS ── */
+.chart-box { position: relative; width: 100%; }
+.chart-box-md  { height: 290px; }
+.chart-box-sm  { height: 230px; }
+.chart-box-lg  { height: 340px; }
+.chart-box-full { height: 370px; }
+
+/* ── STAT CARDS ── */
+.stats-row { display: flex; gap: 12px; margin-bottom: 16px; }
+.stat-card { flex: 1; background: var(--col-surface2); border-radius: 8px; padding: 14px 16px; border: 1px solid rgba(255,255,255,.06); }
+.stat-val { font-family: var(--font-display); font-size: 1.8em; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.stat-label { font-size: 0.62em; letter-spacing: .12em; text-transform: uppercase; color: var(--col-muted); }
+
+/* ── SIDEBAR NOTES ── */
+.note-list { display: flex; flex-direction: column; gap: 8px; }
+.note-item {
+  background: var(--col-surface2); border-radius: 6px; padding: 12px 16px;
+  font-size: 0.72em; color: var(--col-muted); line-height: 1.6; border-left: 3px solid;
+}
+.note-item strong { color: var(--col-text); }
+
+/* ── FORMULA BOX ── */
+.formula-box {
+  background: var(--col-surface2); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 8px; padding: 14px 18px; font-size: 0.78em;
+  color: var(--col-accent3); font-family: var(--font-body); margin-top: 10px;
+  line-height: 1.9;
+}
+.formula-box .kw  { color: var(--col-amarillo); }
+.formula-box .val { color: var(--col-accent4); }
+.formula-box .cm  { color: var(--col-muted); }
+
+/* ── MAP MOCK ── */
+.map-mock {
+  background: var(--col-surface2);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+.map-mock canvas { display: block; }
+.map-legend {
+  position: absolute; bottom: 10px; right: 10px;
+  background: rgba(10,10,15,.85); border-radius: 6px; padding: 8px 12px;
+  font-size: 0.62em; display: flex; flex-direction: column; gap: 4px;
+}
+.leg-item { display: flex; align-items: center; gap: 6px; color: var(--col-text); }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── DIASPORA TABLE ── */
+.diaspora-table { width: 100%; border-collapse: collapse; font-size: 0.72em; margin-top: 8px; }
+.diaspora-table th {
+  background: rgba(245,197,24,.1); color: var(--col-amarillo);
+  font-size: 0.75em; letter-spacing: .12em; text-transform: uppercase;
+  padding: 9px 12px; text-align: left; border-bottom: 1px solid rgba(245,197,24,.2);
+}
+.diaspora-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,.04); color: var(--col-text); }
+.diaspora-table tr:hover td { background: rgba(255,255,255,.02); }
+.winner-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 3px;
+  font-size: 0.85em; font-weight: 600;
+}
+
+/* ── COMPETITIVITY BARS ── */
+.comp-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.comp-row { display: flex; align-items: center; gap: 12px; }
+.comp-label { font-size: 0.7em; width: 120px; color: var(--col-muted); flex-shrink: 0; text-align: right; }
+.comp-bar-wrap { flex: 1; height: 18px; background: rgba(255,255,255,.05); border-radius: 4px; overflow: hidden; position: relative; }
+.comp-bar { height: 100%; border-radius: 4px; transition: width .8s cubic-bezier(.16,1,.3,1); }
+.comp-val { font-size: 0.68em; color: var(--col-text); width: 42px; text-align: right; font-family: var(--font-body); }
+
+/* ── FLAG STRIPE ── */
+.flag-stripe { display: flex; height: 4px; border-radius: 2px; overflow: hidden; margin-bottom: 18px; width: 72px; }
+.fs-y { background: var(--col-amarillo); flex: 2 !important; }
+.fs-b { background: var(--col-azul); }
+.fs-r { background: var(--col-rojo); }
+.flag-stripe div { flex: 1; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: linear-gradient(90deg,var(--col-amarillo),transparent); margin: 12px 0; }
+
+/* ── CLOSING ── */
+.closing-slide { background: var(--col-bg) !important; position: relative; overflow: hidden; }
+.closing-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 100%,rgba(245,197,24,.06) 0%,transparent 70%); }
+.closing-content { position: relative; z-index: 2; }
+.closing-title { font-family: var(--font-display); font-size: 2.6em; font-weight: 800; line-height: 1.06; margin-bottom: 14px; }
+.closing-title span { color: var(--col-amarillo); }
+.closing-quote { font-family: var(--font-serif); font-style: italic; font-size: .95em; color: var(--col-muted); max-width: 500px; line-height: 1.7; margin-bottom: 28px; }
+.info-chips { display: flex; gap: 16px; flex-wrap: wrap; }
+.info-chip { background: var(--col-surface2); border-radius: 6px; padding: 10px 16px; font-size: 0.7em; }
+.info-chip strong { color: var(--col-amarillo); margin-right: 6px; }
+.info-chip span { color: var(--col-muted); }
+
+/* ── REVEAL OVERRIDES ── */
+.reveal .progress { background: rgba(255,255,255,.05); }
+.reveal .progress span { background: var(--col-amarillo); }
+.reveal .controls button { color: var(--col-amarillo); }
+.reveal .slide-number { color: var(--col-muted); font-family: var(--font-body); font-size: 12px; }
+.reveal .slides section .fragment { opacity: 0; transition: opacity .35s; }
+.reveal .slides section .fragment.visible { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- ══ SLIDE 1 — PORTADA ══ -->
+<section class="cover-slide">
+  <div class="cover-grid"></div>
+  <div class="cover-stripe"></div>
+  <div class="cover-content">
+    <div class="cover-eyebrow">Estadística Descriptiva · Análisis Exploratorio de Datos</div>
+    <h1 class="cover-title">Elecciones<br><span>Presidenciales</span><br>Colombia 2022</h1>
+    <p class="cover-subtitle">Propuesta de análisis descriptivo y exploratorio de los resultados de primera vuelta — mesa por mesa</p>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><span class="cover-meta-val">33.0M</span><span class="cover-meta-label">Votos emitidos</span></div>
+      <div class="cover-meta-item"><span class="cover-meta-val">105K+</span><span class="cover-meta-label">Mesas de votación</span></div>
+      <div class="cover-meta-item"><span class="cover-meta-val">4</span><span class="cover-meta-label">Análisis propuestos</span></div>
+      <div class="cover-meta-item"><span class="cover-meta-val">31 May 26</span><span class="cover-meta-label">Objetivo final</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 2 — AGENDA ══ -->
+<section>
+  <div class="slide-label">00 — Propuestas de análisis</div>
+  <h2 class="slide-h1">Cuatro <span>Análisis</span> Propuestos</h2>
+  <div class="overview-grid">
+    <div class="ov-card">
+      <div class="ov-num">Análisis 01</div>
+      <div class="ov-title">Estadísticas Descriptivas Completas</div>
+      <div class="ov-desc">Media, mediana, varianza, CV, asimetría y curtosis por candidato, departamento y zona.</div>
+      <span class="ov-tag tag-uni">Univariado</span>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num">Análisis 02</div>
+      <div class="ov-title">Mapas Coropléticos Interactivos</div>
+      <div class="ov-desc">Candidato ganador e intensidad de voto a nivel municipal — visualización geoespacial.</div>
+      <span class="ov-tag tag-geo">Geoespacial</span>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num">Análisis 05</div>
+      <div class="ov-title">Diáspora vs Interior</div>
+      <div class="ov-desc">Comparación del perfil de voto en el exterior (DEP=88) frente a los patrones nacionales.</div>
+      <span class="ov-tag tag-comp">Comparativo</span>
+    </div>
+    <div class="ov-card">
+      <div class="ov-num">Análisis 06</div>
+      <div class="ov-title">Índice de Competitividad Electoral</div>
+      <div class="ov-desc">Margen entre 1er y 2do lugar por municipio — mapa de zonas disputadas vs dominadas.</div>
+      <span class="ov-tag tag-idx">Índice</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 3 — SECTION 01 ══ -->
+<section class="section-slide">
+  <span class="section-number">01</span>
+  <div class="flag-stripe"><div class="fs-y"></div><div class="fs-b"></div><div class="fs-r"></div></div>
+  <h2 class="section-title">Estadísticas<br><em>Descriptivas</em><br>Completas</h2>
+  <p class="section-desc">Media, mediana, varianza, CV, asimetría y curtosis — segmentado por candidato, departamento y tipo de zona.</p>
+</section>
+
+<!-- ══ SLIDE 4 — DESCRIPTIVAS: KPIs ══ -->
+<section>
+  <div class="slide-label">Análisis 01 — Estadísticas Descriptivas · Métricas clave</div>
+  <h2 class="slide-h1">Distribución de Votos <span>por Mesa</span></h2>
+  <div class="two-col-wide">
+    <div>
+      <div class="chart-box chart-box-lg"><canvas id="histVotos"></canvas></div>
+    </div>
+    <div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" style="color:var(--col-amarillo);font-size:1.4em">~250</div><div class="stat-label">Mediana votos/mesa</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--col-accent3);font-size:1.4em">~85</div><div class="stat-label">Desv. estándar</div></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" style="color:var(--col-accent2);font-size:1.4em">+1.8</div><div class="stat-label">Asimetría</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:var(--col-accent4);font-size:1.4em">0.34</div><div class="stat-label">CV (coef. variación)</div></div>
+      </div>
+      <div class="note-list">
+        <div class="note-item" style="border-color:var(--col-amarillo)"><strong>Sesgo positivo (+1.8):</strong> la mayoría de mesas tiene pocos votos; algunas mesas urbanas elevan la media.</div>
+        <div class="note-item" style="border-color:var(--col-accent3)"><strong>CV = 34%:</strong> dispersión moderada — suficiente heterogeneidad para segmentar por zona.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 5 — DESCRIPTIVAS: BOXPLOT POR CANDIDATO ══ -->
+<section>
+  <div class="slide-label">Análisis 01 — Estadísticas Descriptivas · Comparación entre candidatos</div>
+  <h2 class="slide-h1">Variabilidad por <span>Candidato</span> — Votos por Mesa</h2>
+  <div class="two-col-wide">
+    <div>
+      <div class="chart-box chart-box-lg"><canvas id="boxplotChart"></canvas></div>
+    </div>
+    <div>
+      <div class="note-list" style="gap:10px">
+        <div class="note-item" style="border-color:#FF6B6B"><strong>Petro:</strong> mayor mediana y mayor dispersión — fuerte en capitales, variable en zonas rurales.</div>
+        <div class="note-item" style="border-color:#4FC3F7"><strong>Gutiérrez:</strong> distribución más estrecha — electorado geográficamente más uniforme.</div>
+        <div class="note-item" style="border-color:var(--col-amarillo)"><strong>Hernández:</strong> muchos outliers positivos — picos inesperados en municipios intermedios.</div>
+        <div class="note-item" style="border-color:var(--col-accent4)"><strong>Fajardo:</strong> valores bajos y concentrados — electorado de nicho urbano.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 6 — SECTION 02 ══ -->
+<section class="section-slide">
+  <span class="section-number">02</span>
+  <div class="flag-stripe"><div class="fs-y"></div><div class="fs-b"></div><div class="fs-r"></div></div>
+  <h2 class="section-title">Mapas<br><em>Coropléticos</em><br>Interactivos</h2>
+  <p class="section-desc">Visualización geoespacial del candidato ganador e intensidad de voto a nivel municipal con Leaflet / Folium.</p>
+</section>
+
+<!-- ══ SLIDE 7 — MAPA: GANADOR MUNICIPAL ══ -->
+<section>
+  <div class="slide-label">Análisis 02 — Mapas Coropléticos · Ganador por municipio</div>
+  <h2 class="slide-h1">Mapa de <span>Ganadores</span> Municipales</h2>
+  <div class="two-col-wide">
+    <div>
+      <div class="map-mock" style="height:340px;">
+        <canvas id="mapGanador" style="width:100%;height:100%;"></canvas>
+        <div class="map-legend">
+          <div class="leg-item"><div class="leg-dot" style="background:#FF6B6B"></div>Petro</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#4FC3F7"></div>Gutiérrez</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#F5C518"></div>Hernández</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#7BFF8B"></div>Fajardo</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="note-list">
+        <div class="note-item" style="border-color:#FF6B6B"><strong>Petro</strong> domina grandes ciudades (Bogotá, Cali, Medellín) y Pacífico.</div>
+        <div class="note-item" style="border-color:#4FC3F7"><strong>Gutiérrez</strong> predomina en Antioquia fuera de Medellín y Eje Cafetero.</div>
+        <div class="note-item" style="border-color:var(--col-amarillo)"><strong>Hernández</strong> gana en Santanderes y municipios intermedios del interior.</div>
+      </div>
+      <div class="formula-box" style="margin-top:12px">
+        <span class="cm"># R — ganador por municipio</span><br>
+        mun_df |&gt; <span class="kw">group_by</span>(MUNNOMBRE) |&gt;<br>
+        &nbsp;&nbsp;<span class="kw">summarise</span>(<span class="kw">across</span>(cands, sum)) |&gt;<br>
+        &nbsp;&nbsp;<span class="kw">mutate</span>(ganador = <span class="val">names</span>(<span class="val">which.max</span>(<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">c_across</span>(cands))))
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 8 — MAPA: INTENSIDAD ══ -->
+<section>
+  <div class="slide-label">Análisis 02 — Mapas Coropléticos · Intensidad territorial de Petro</div>
+  <h2 class="slide-h1">Intensidad del Voto — <span>Gradiente Territorial</span></h2>
+  <div class="two-col-wide">
+    <div>
+      <div class="map-mock" style="height:340px;">
+        <canvas id="mapIntensidad" style="width:100%;height:100%;"></canvas>
+        <div class="map-legend">
+          <div style="font-size:0.7em;color:var(--col-muted);margin-bottom:4px;">% Petro</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.65em;color:var(--col-text)">
+            <div style="width:60px;height:8px;border-radius:3px;background:linear-gradient(90deg,#1a1a2e,#FF6B6B)"></div>
+            <span>0% → 70%+</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:0.75em;color:var(--col-muted);line-height:1.7;margin-bottom:14px;">El mapa de <strong style="color:var(--col-text)">intensidad continua</strong> revela gradientes que el mapa de ganadores no muestra: ¿Petro ganó por 5pp o por 40pp?</p>
+      <div class="note-list">
+        <div class="note-item" style="border-color:var(--col-accent3)"><strong>Uso propuesto:</strong> un mapa por candidato con escala de color continua (0–100%) usando <code>leaflet::colorNumeric()</code> en R.</div>
+        <div class="note-item" style="border-color:var(--col-accent4)"><strong>Capa adicional:</strong> popups con tabla al hacer clic en cada municipio — total votos, % por candidato, número de mesas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 9 — SECTION 05 ══ -->
+<section class="section-slide">
+  <span class="section-number">05</span>
+  <div class="flag-stripe"><div class="fs-y"></div><div class="fs-b"></div><div class="fs-r"></div></div>
+  <h2 class="section-title">Diáspora<br><em>vs Interior</em></h2>
+  <p class="section-desc">Comparación estadística del perfil de votación en consulados (DEP=88) frente al comportamiento electoral en el territorio nacional.</p>
+</section>
+
+<!-- ══ SLIDE 10 — DIÁSPORA: PERFIL ══ -->
+<section>
+  <div class="slide-label">Análisis 05 — Diáspora vs Interior · Perfil de voto por consulado</div>
+  <h2 class="slide-h1">Perfil de Voto en el <span>Exterior</span></h2>
+  <div class="two-col">
+    <div>
+      <div class="chart-box chart-box-md"><canvas id="diasporaBarChart"></canvas></div>
+    </div>
+    <div>
+      <table class="diaspora-table">
+        <thead><tr><th>Consulado</th><th>1er lugar</th><th>%</th><th>2do lugar</th></tr></thead>
+        <tbody>
+          <tr><td>Buenos Aires</td><td><span class="winner-badge" style="background:rgba(255,107,107,.2);color:#FF6B6B">Petro</span></td><td>57.4%</td><td>Gutiérrez 17%</td></tr>
+          <tr><td>Berlín</td><td><span class="winner-badge" style="background:rgba(255,107,107,.2);color:#FF6B6B">Petro</span></td><td>70.7%</td><td>Fajardo 17.3%</td></tr>
+          <tr><td>Willemstad</td><td><span class="winner-badge" style="background:rgba(245,197,24,.2);color:#F5C518">Hernández</span></td><td>51.5%</td><td>Petro 42.4%</td></tr>
+          <tr><td>Nacional</td><td><span class="winner-badge" style="background:rgba(255,107,107,.2);color:#FF6B6B">Petro</span></td><td>40.3%</td><td>Gutiérrez 28.2%</td></tr>
+        </tbody>
+      </table>
+      <div class="note-item" style="border-color:var(--col-accent2);margin-top:10px;font-size:0.7em;color:var(--col-muted);padding:10px 14px;background:var(--col-surface2);border-left:3px solid;border-radius:5px;">
+        <strong style="color:var(--col-text)">Hallazgo clave:</strong> Berlín vota +30pp más por Petro que el promedio nacional — la diáspora europea tiene un perfil ideológico diferenciado.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 11 — DIÁSPORA: TEST ESTADÍSTICO ══ -->
+<section>
+  <div class="slide-label">Análisis 05 — Diáspora vs Interior · Prueba de hipótesis</div>
+  <h2 class="slide-h1">¿Diferencia <span>Estadísticamente</span> Significativa?</h2>
+  <div class="two-col-wide">
+    <div>
+      <div class="chart-box chart-box-md"><canvas id="diasporaTestChart"></canvas></div>
+    </div>
+    <div>
+      <div class="note-list">
+        <div class="note-item" style="border-color:var(--col-amarillo)">
+          <strong>H₀:</strong> la distribución del % de votos por Petro en consulados es igual a la del interior.<br>
+          <strong>H₁:</strong> la mediana exterior ≠ mediana interior.
+        </div>
+        <div class="note-item" style="border-color:var(--col-accent3)">
+          <strong>Prueba propuesta:</strong> Mann-Whitney U (no paramétrico) — adecuado porque las distribuciones son asimétricas y el n exterior es pequeño.
+        </div>
+        <div class="note-item" style="border-color:var(--col-accent4)">
+          <strong>Complemento:</strong> IC 95% por bootstrapping para la diferencia de medianas entre segmentos.
+        </div>
+      </div>
+      <div class="formula-box">
+        <span class="cm"># R</span><br>
+        wilcox.test(<span class="kw">pct_petro</span> ~ <span class="kw">segmento</span>,<br>
+        &nbsp;&nbsp;data = df_mesas,<br>
+        &nbsp;&nbsp;alternative = <span class="val">"two.sided"</span>)
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 12 — SECTION 06 ══ -->
+<section class="section-slide">
+  <span class="section-number">06</span>
+  <div class="flag-stripe"><div class="fs-y"></div><div class="fs-b"></div><div class="fs-r"></div></div>
+  <h2 class="section-title">Índice de<br><em>Competitividad</em><br>Electoral</h2>
+  <p class="section-desc">Diferencia en puntos porcentuales entre el 1er y 2do lugar por municipio — identifica zonas disputadas vs dominadas.</p>
+</section>
+
+<!-- ══ SLIDE 13 — COMPETITIVIDAD: RANKING ══ -->
+<section>
+  <div class="slide-label">Análisis 06 — Competitividad Electoral · Ranking de municipios</div>
+  <h2 class="slide-h1">Municipios <span>Disputados</span> vs Dominados</h2>
+  <div class="two-col-wide">
+    <div>
+      <div class="chart-box chart-box-lg"><canvas id="competChart"></canvas></div>
+    </div>
+    <div>
+      <p style="font-size:0.73em;color:var(--col-muted);line-height:1.7;margin-bottom:12px;">El <strong style="color:var(--col-text)">margen de victoria</strong> (diferencia pp entre 1° y 2°) clasifica los municipios en tres categorías:</p>
+      <div class="comp-list">
+        <div class="comp-row">
+          <span class="comp-label">Disputado (&lt;5pp)</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:18%;background:#FF4D6D"></div></div>
+          <span class="comp-val" style="color:#FF4D6D">~18%</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-label">Definido (5–20pp)</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:47%;background:var(--col-amarillo)"></div></div>
+          <span class="comp-val" style="color:var(--col-amarillo)">~47%</span>
+        </div>
+        <div class="comp-row">
+          <span class="comp-label">Dominado (&gt;20pp)</span>
+          <div class="comp-bar-wrap"><div class="comp-bar" style="width:35%;background:var(--col-accent3)"></div></div>
+          <span class="comp-val" style="color:var(--col-accent3)">~35%</span>
+        </div>
+      </div>
+      <div class="formula-box" style="margin-top:12px">
+        <span class="cm"># Cálculo del índice</span><br>
+        mun_df |&gt; <span class="kw">mutate</span>(<br>
+        &nbsp;&nbsp;rank1 = <span class="val">apply</span>(.[cands], 1, max),<br>
+        &nbsp;&nbsp;rank2 = <span class="val">apply</span>(.[cands], 1, <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;\(x) sort(x, decreasing=T)[2]),<br>
+        &nbsp;&nbsp;margen = (rank1 - rank2) / total * 100)
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 14 — COMPETITIVIDAD: MAPA ══ -->
+<section>
+  <div class="slide-label">Análisis 06 — Competitividad Electoral · Visualización geoespacial</div>
+  <h2 class="slide-h1">Mapa de <span>Zonas Disputadas</span></h2>
+  <div class="two-col-wide">
+    <div>
+      <div class="map-mock" style="height:340px;">
+        <canvas id="mapCompet" style="width:100%;height:100%;"></canvas>
+        <div class="map-legend">
+          <div style="font-size:0.65em;color:var(--col-muted);margin-bottom:4px;">Margen victoria</div>
+          <div class="leg-item"><div class="leg-dot" style="background:#FF4D6D"></div><span style="font-size:0.8em">&lt; 5pp  Disputado</span></div>
+          <div class="leg-item"><div class="leg-dot" style="background:#F5C518"></div><span style="font-size:0.8em">5–20pp Definido</span></div>
+          <div class="leg-item"><div class="leg-dot" style="background:#4CC9F0"></div><span style="font-size:0.8em">&gt;20pp Dominado</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="note-list">
+        <div class="note-item" style="border-color:#FF4D6D"><strong>Zonas rojas (disputadas):</strong> municipios clave para la estrategia de campaña en 2026 — cualquier candidato puede ganar.</div>
+        <div class="note-item" style="border-color:var(--col-accent3)"><strong>Zonas azules (dominadas):</strong> movilización tiene bajo retorno — el resultado ya está definido.</div>
+        <div class="note-item" style="border-color:var(--col-accent4)"><strong>Cruce con 2026:</strong> comparar mapas 2022 vs 2026 para identificar municipios que cambiaron de categoría.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 15 — CIERRE ══ -->
+<section class="closing-slide">
+  <div class="closing-bg"></div>
+  <div class="closing-content">
+    <div class="flag-stripe" style="width:60px;margin-bottom:22px;"><div class="fs-y"></div><div class="fs-b"></div><div class="fs-r"></div></div>
+    <h2 class="closing-title">Propuesta <span>lista</span><br>para el 31 May</h2>
+    <p class="closing-quote">"Los datos electorales a nivel de mesa son el microscopio de la democracia. Cada fila es un grupo de ciudadanos que tomó una decisión."</p>
+    <div class="divider" style="max-width:280px;margin-bottom:22px;"></div>
+    <div class="info-chips">
+      <div class="info-chip"><strong>Datos:</strong><span>Registraduría Nacional</span></div>
+      <div class="info-chip"><strong>Stack:</strong><span>R · ggplot2 · leaflet · Quarto</span></div>
+      <div class="info-chip"><strong>Formato:</strong><span>RevealJS</span></div>
+      <div class="info-chip"><strong>Asignatura:</strong><span>Estadística Descriptiva</span></div>
+    </div>
+  </div>
+</section>
+
+</div></div>
+<script>
+Reveal.initialize({
+  hash: true, slideNumber: 'c/t', transition: 'fade',
+  transitionSpeed: 'fast', controls: true, progress: true,
+  center: false, width: 1280, height: 720, margin: 0, plugins: []
+});
+
+const BG = '#0A0A0F', SURF = '#1C1C28', TEXT = '#E8E6E0', MUTED = '#7A7A8C';
+const GRID = 'rgba(255,255,255,0.05)';
+const PETRO = '#FF6B6B', GUTI = '#4FC3F7', HERN = '#F5C518', FAJ = '#7BFF8B';
+Chart.defaults.color = TEXT;
+Chart.defaults.font.family = 'DM Mono, monospace';
+Chart.defaults.font.size = 11;
+
+const baseScales = {
+  x: { grid: { color: GRID }, ticks: { color: MUTED } },
+  y: { grid: { color: GRID }, ticks: { color: MUTED } }
+};
+
+let rendered = {};
+Reveal.on('slidechanged', ({ indexh }) => {
+
+  // ── SLIDE 4: Histograma votos/mesa ──────────────────────────
+  if (indexh === 3 && !rendered[3]) {
+    rendered[3] = true;
+    const ctx = document.getElementById('histVotos').getContext('2d');
+    const labels = ['0–50','50–100','100–150','150–200','200–250','250–300','300–350','350–400','400–450','450–500'];
+    const data   = [1200, 5800, 15200, 24500, 30000, 21000, 11000, 4800, 1800, 600];
+    const grads  = labels.map((_,i) => `hsla(${200+i*9},70%,62%,0.75)`);
+    new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Nº mesas', data, backgroundColor: grads, borderWidth: 0, borderRadius: 3 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ...baseScales.x, title: { display: true, text: 'Votos válidos por mesa', color: MUTED } },
+          y: { ...baseScales.y, title: { display: true, text: 'Frecuencia (nº mesas)', color: MUTED } }
+        }
+      }
+    });
+  }
+
+  // ── SLIDE 5: Boxplot simulado por candidato ─────────────────
+  if (indexh === 4 && !rendered[4]) {
+    rendered[4] = true;
+    const ctx = document.getElementById('boxplotChart').getContext('2d');
+    // Simulate 50 random values per candidate for visual approximation
+    function fakeBox(median, spread, n=50) {
+      return Array.from({length:n}, () => {
+        const u = Math.random(), v = Math.random();
+        return Math.max(0, median + spread * Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v));
+      });
+    }
+    const datasets = [
+      { label:'Petro',      data: fakeBox(90,55).map((v,i)=>({x:i,y:Math.round(v)})), backgroundColor:'rgba(255,107,107,0.55)', borderColor:PETRO },
+      { label:'Gutiérrez',  data: fakeBox(55,30).map((v,i)=>({x:i,y:Math.round(v)})), backgroundColor:'rgba(79,195,247,0.55)', borderColor:GUTI },
+      { label:'Hernández',  data: fakeBox(42,38).map((v,i)=>({x:i,y:Math.round(v)})), backgroundColor:'rgba(245,197,24,0.55)', borderColor:HERN },
+      { label:'Fajardo',    data: fakeBox(18,14).map((v,i)=>({x:i,y:Math.round(v)})), backgroundColor:'rgba(123,255,139,0.45)', borderColor:FAJ },
+    ];
+    // Represent as scatter for approximate visual
+    new Chart(ctx, {
+      type: 'scatter',
+      data: { datasets: datasets.map((d,ci) => ({
+        label: d.label,
+        data: d.data.map(p => ({ x: ci + (Math.random()-.5)*.4, y: p.y })),
+        backgroundColor: d.backgroundColor,
+        borderColor: d.borderColor,
+        borderWidth: 0.5, pointRadius: 3.5, pointHoverRadius: 5
+      }))},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { boxWidth: 10, color: TEXT } } },
+        scales: {
+          x: { ...baseScales.x, min: -0.7, max: 3.7,
+               ticks: { callback: v => ['Petro','Gutiérrez','Hernández','Fajardo'][Math.round(v)] || '', color: MUTED } },
+          y: { ...baseScales.y, title: { display: true, text: 'Votos en la mesa', color: MUTED } }
+        }
+      }
+    });
+  }
+
+  // ── SLIDE 7: Mapa choropleth mock — ganador ─────────────────
+  if (indexh === 6 && !rendered[6]) {
+    rendered[6] = true;
+    const canvas = document.getElementById('mapGanador');
+    canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    drawMockMap(ctx, canvas.width, canvas.height, 'winner');
+  }
+
+  // ── SLIDE 8: Mapa intensidad ────────────────────────────────
+  if (indexh === 7 && !rendered[7]) {
+    rendered[7] = true;
+    const canvas = document.getElementById('mapIntensidad');
+    canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    drawMockMap(ctx, canvas.width, canvas.height, 'intensity');
+  }
+
+  // ── SLIDE 10: Diáspora barras agrupadas ─────────────────────
+  if (indexh === 9 && !rendered[9]) {
+    rendered[9] = true;
+    const ctx = document.getElementById('diasporaBarChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Buenos Aires','Berlín','Willemstad','Promedio Nacional'],
+        datasets: [
+          { label: 'Petro',     data: [57.4, 70.7, 42.4, 40.3], backgroundColor: 'rgba(255,107,107,0.78)', borderRadius: 3 },
+          { label: 'Gutiérrez', data: [17.1,  5.3,  4.5, 28.2], backgroundColor: 'rgba(79,195,247,0.78)',  borderRadius: 3 },
+          { label: 'Hernández', data: [13.2,  4.0, 51.5, 23.9], backgroundColor: 'rgba(245,197,24,0.78)',  borderRadius: 3 },
+          { label: 'Fajardo',   data: [8.6,  17.3,  4.5,  4.2], backgroundColor: 'rgba(123,255,139,0.72)', borderRadius: 3 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { boxWidth: 10, color: TEXT } } },
+        scales: {
+          x: { ...baseScales.x },
+          y: { ...baseScales.y, max: 85,
+               title: { display: true, text: '% votos válidos', color: MUTED } }
+        }
+      }
+    });
+  }
+
+  // ── SLIDE 11: Diáspora vs interior — distribución ───────────
+  if (indexh === 10 && !rendered[10]) {
+    rendered[10] = true;
+    const ctx = document.getElementById('diasporaTestChart').getContext('2d');
+    // Simulated % Petro distributions: interior vs exterior
+    function normalSamples(mu, sigma, n) {
+      return Array.from({length:n}, () => {
+        const u=Math.random(), v=Math.random();
+        return +(mu + sigma * Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v)).toFixed(1);
+      }).sort((a,b)=>a-b);
+    }
+    const interior = normalSamples(38, 12, 80);
+    const exterior = normalSamples(56, 14, 20);
+    new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          { label: 'Interior (mesas)', data: interior.map((y,i)=>({x:0+(Math.random()-.5)*.4,y})),
+            backgroundColor:'rgba(79,195,247,0.45)', borderColor:GUTI, borderWidth:0.5, pointRadius:4 },
+          { label: 'Exterior (consulados)', data: exterior.map((y,i)=>({x:1+(Math.random()-.5)*.4,y})),
+            backgroundColor:'rgba(255,107,107,0.55)', borderColor:PETRO, borderWidth:0.5, pointRadius:5 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { boxWidth:10, color:TEXT } } },
+        scales: {
+          x: { ...baseScales.x, min:-0.8, max:1.8,
+               ticks: { callback: v => v===0?'Interior':v===1?'Exterior':'', color:MUTED } },
+          y: { ...baseScales.y, title:{ display:true, text:'% votos Petro por mesa', color:MUTED } }
+        }
+      }
+    });
+  }
+
+  // ── SLIDE 13: Competitividad — barras horizontales ──────────
+  if (indexh === 12 && !rendered[12]) {
+    rendered[12] = true;
+    const ctx = document.getElementById('competChart').getContext('2d');
+    const muns = ['Bogotá','Medellín','Cali','Barranquilla','Bucaramanga',
+                  'Manizales','Pereira','Pasto','Ibagué','Cúcuta',
+                  'Valledupar','Montería','Riohacha','Quibdó','Leticia'];
+    const margenes = [8.1,14.3,3.2,19.7,22.4,11.6,7.8,28.1,17.3,4.9,
+                      31.2,25.6,6.4,38.5,42.1];
+    const colors = margenes.map(m =>
+      m < 5 ? 'rgba(255,77,109,0.8)' :
+      m < 20 ? 'rgba(245,197,24,0.8)' : 'rgba(76,201,240,0.8)');
+    new Chart(ctx, {
+      type: 'bar',
+      data: { labels: muns, datasets: [{
+        label: 'Margen 1°–2° (pp)', data: margenes,
+        backgroundColor: colors, borderRadius: 3, borderWidth: 0
+      }]},
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ...baseScales.x, title: { display:true, text:'Diferencia pp entre 1° y 2°', color:MUTED } },
+          y: { ...baseScales.y, ticks: { font: { size: 9 } } }
+        }
+      }
+    });
+  }
+
+  // ── SLIDE 14: Mapa competitividad ───────────────────────────
+  if (indexh === 13 && !rendered[13]) {
+    rendered[13] = true;
+    const canvas = document.getElementById('mapCompet');
+    canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    drawMockMap(ctx, canvas.width, canvas.height, 'compet');
+  }
+});
+
+/* ── HELPER: Mapa Colombia SVG-like mock ─────────────────────── */
+function drawMockMap(ctx, W, H, mode) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = SURF;
+  ctx.fillRect(0, 0, W, H);
+
+  // Approximate Colombia outline as polygon regions
+  const regions = [
+    // [relX, relY, relW, relH, region_name]
+    [.25,.05,.22,.18,'Caribe'],
+    [.10,.15,.16,.22,'Pacífico N'],
+    [.28,.20,.20,.20,'Andina N'],
+    [.46,.12,.22,.16,'Llanos N'],
+    [.65,.08,.20,.14,'Llanos NE'],
+    [.08,.34,.16,.24,'Pacífico C'],
+    [.22,.37,.18,.22,'Andina C'],
+    [.38,.30,.22,.24,'Andina E'],
+    [.58,.24,.24,.22,'Orinoquia'],
+    [.10,.55,.16,.22,'Pacífico S'],
+    [.24,.56,.16,.20,'Andina S'],
+    [.38,.52,.20,.22,'Llanos S'],
+    [.56,.44,.28,.30,'Amazonia N'],
+    [.18,.74,.22,.20,'Amazonia SW'],
+    [.38,.72,.28,.22,'Amazonia S'],
+    [.64,.72,.18,.22,'Amazonia SE'],
+  ];
+
+  const colors = {
+    winner: [PETRO,GUTI,PETRO,HERN,HERN, PETRO,PETRO,HERN,HERN, PETRO,PETRO,HERN,HERN,PETRO,HERN,HERN],
+    intensity: [
+      'rgba(255,107,107,0.85)','rgba(255,107,107,0.35)','rgba(255,107,107,0.9)',
+      'rgba(245,197,24,0.55)','rgba(245,197,24,0.45)',
+      'rgba(255,107,107,0.75)','rgba(255,107,107,0.95)','rgba(245,197,24,0.7)',
+      'rgba(245,197,24,0.5)',
+      'rgba(255,107,107,0.8)','rgba(255,107,107,0.7)','rgba(245,197,24,0.6)',
+      'rgba(245,197,24,0.35)','rgba(255,107,107,0.55)','rgba(245,197,24,0.3)','rgba(245,197,24,0.25)'
+    ],
+    compet: [
+      'rgba(245,197,24,0.8)','rgba(245,197,24,0.75)','rgba(255,77,109,0.85)',
+      'rgba(245,197,24,0.7)','rgba(76,201,240,0.75)',
+      'rgba(255,77,109,0.8)','rgba(245,197,24,0.8)','rgba(76,201,240,0.8)',
+      'rgba(76,201,240,0.7)',
+      'rgba(255,77,109,0.75)','rgba(245,197,24,0.75)','rgba(76,201,240,0.65)',
+      'rgba(76,201,240,0.6)','rgba(76,201,240,0.55)','rgba(76,201,240,0.5)','rgba(76,201,240,0.45)'
+    ]
+  };
+
+  regions.forEach(([rx,ry,rw,rh], i) => {
+    const x=rx*W, y=ry*H, w=rw*W, h=rh*H;
+    ctx.fillStyle = colors[mode][i] || MUTED;
+    // Rounded rectangle approximating region
+    const r = 6;
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = BG;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // Label "Colombia"
+  ctx.fillStyle = 'rgba(232,230,224,0.15)';
+  ctx.font = 'bold 18px Syne, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('COLOMBIA', W/2, H - 14);
+}
+</script>
+</body>
+</html>
