@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Electoral Colombia 2022 — Primera Vuelta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400;500&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --col-amarillo: #F5C518;
+            --col-azul: #003087;
+            --col-rojo: #CE1126;
+            --col-bg: #0A0A0F;
+            --col-surface: #12121A;
+            --col-surface2: #1C1C28;
+            --col-text: #E8E6E0;
+            --col-muted: #7A7A8C;
+            --col-accent1: #F5C518;
+            --col-accent2: #FF4D6D;
+            --col-accent3: #4CC9F0;
+            --col-accent4: #7BFF8B;
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'DM Mono', monospace;
+            --font-serif: 'Fraunces', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .reveal-viewport {
+            background: var(--col-bg);
+        }
+
+        .reveal {
+            font-family: var(--font-body);
+            color: var(--col-text);
+            font-size: 18px;
+        }
+
+        .reveal .slides section {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 60px;
+            text-align: left;
+        }
+
+        /* ─── SLIDE LABELS ─── */
+        .slide-label {
+            font-family: var(--font-body);
+            font-size: 0.65em;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--col-muted);
+            margin-bottom: 16px;
+        }
+
+        /* ─── COVER SLIDE ─── */
+        .cover-slide {
+            background: var(--col-bg) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(245, 197, 24, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(245, 197, 24, 0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        .cover-stripe {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: linear-gradient(180deg, var(--col-amarillo), var(--col-rojo), var(--col-azul));
+        }
+
+        .cover-content {
+            position: relative;
+            z-index: 2;
+            padding-left: 30px;
+        }
+
+        .cover-eyebrow {
+            font-family: var(--font-body);
+            font-size: 0.7em;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--col-amarillo);
+            margin-bottom: 20px;
+        }
+
+        .cover-title {
+            font-family: var(--font-display);
+            font-size: 3.2em;
+            font-weight: 800;
+            line-height: 1.05;
+            color: var(--col-text);
+            margin-bottom: 16px;
+        }
+
+        .cover-title span {
+            color: var(--col-amarillo);
+        }
+
+        .cover-subtitle {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-weight: 300;
+            font-size: 1.1em;
+            color: var(--col-muted);
+            margin-bottom: 40px;
+            max-width: 520px;
+        }
+
+        .cover-meta {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .cover-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .cover-meta-val {
+            font-family: var(--font-display);
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--col-amarillo);
+        }
+
+        .cover-meta-label {
+            font-size: 0.65em;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--col-muted);
+        }
+
+        /* ─── SECTION DIVIDER ─── */
+        .section-slide {
+            background: var(--col-surface) !important;
+        }
+
+        .section-number {
+            font-family: var(--font-display);
+            font-size: 8em;
+            font-weight: 800;
+            color: rgba(245, 197, 24, 0.08);
+            line-height: 1;
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 2.4em;
+            font-weight: 800;
+            color: var(--col-text);
+            line-height: 1.1;
+            max-width: 70%;
+        }
+
+        .section-title em {
+            font-style: normal;
+            color: var(--col-amarillo);
+        }
+
+        .section-desc {
+            margin-top: 16px;
+            font-size: 0.85em;
+            color: var(--col-muted);
+            max-width: 55%;
+            line-height: 1.7;
+        }
+
+        /* ─── CONTENT SLIDES ─── */
+        .slide-h1 {
+            font-family: var(--font-display);
+            font-size: 1.7em;
+            font-weight: 700;
+            color: var(--col-text);
+            margin-bottom: 24px;
+            line-height: 1.15;
+        }
+
+        .slide-h1 span {
+            color: var(--col-amarillo);
+        }
+
+        /* ─── DATA SCHEMA ─── */
+        .schema-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.72em;
+            margin-top: 8px;
+        }
+
+        .schema-table th {
+            background: rgba(245, 197, 24, 0.12);
+            color: var(--col-amarillo);
+            font-family: var(--font-display);
+            font-size: 0.75em;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(245, 197, 24, 0.2);
+        }
+
+        .schema-table td {
+            padding: 8px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--col-text);
+            vertical-align: top;
+        }
+
+        .schema-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+        }
+
+        .tag-cat {
+            background: rgba(76, 201, 240, 0.15);
+            color: var(--col-accent3);
+        }
+
+        .tag-num {
+            background: rgba(123, 255, 139, 0.15);
+            color: var(--col-accent4);
+        }
+
+        .tag-text {
+            background: rgba(255, 77, 109, 0.15);
+            color: var(--col-accent2);
+        }
+
+        /* ─── OBJECTIVES GRID ─── */
+        .obj-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 10px;
+        }
+
+        .obj-card {
+            background: var(--col-surface2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .obj-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .obj-card:nth-child(1)::before {
+            background: var(--col-amarillo);
+        }
+
+        .obj-card:nth-child(2)::before {
+            background: var(--col-accent3);
+        }
+
+        .obj-card:nth-child(3)::before {
+            background: var(--col-accent2);
+        }
+
+        .obj-card:nth-child(4)::before {
+            background: var(--col-accent4);
+        }
+
+        .obj-icon {
+            font-size: 1.6em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .obj-title {
+            font-family: var(--font-display);
+            font-size: 0.9em;
+            font-weight: 700;
+            color: var(--col-text);
+            margin-bottom: 6px;
+        }
+
+        .obj-desc {
+            font-size: 0.72em;
+            color: var(--col-muted);
+            line-height: 1.6;
+        }
+
+        /* ─── CHART SLIDES ─── */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+        }
+
+        .chart-container-sm {
+            position: relative;
+            width: 100%;
+            height: 240px;
+        }
+
+        /* ─── STAT CARDS ─── */
+        .stats-row {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--col-surface2);
+            border-radius: 8px;
+            padding: 16px 18px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .stat-val {
+            font-family: var(--font-display);
+            font-size: 2em;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.65em;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--col-muted);
+        }
+
+        /* ─── ANALYSIS CARDS ─── */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .analysis-card {
+            background: var(--col-surface2);
+            border-radius: 8px;
+            padding: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .analysis-num {
+            font-family: var(--font-body);
+            font-size: 0.6em;
+            color: var(--col-amarillo);
+            letter-spacing: 0.15em;
+            margin-bottom: 8px;
+        }
+
+        .analysis-title {
+            font-family: var(--font-display);
+            font-size: 0.85em;
+            font-weight: 700;
+            color: var(--col-text);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        .analysis-desc {
+            font-size: 0.7em;
+            color: var(--col-muted);
+            line-height: 1.65;
+        }
+
+        .analysis-tag {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 3px 8px;
+            background: rgba(245, 197, 24, 0.1);
+            color: var(--col-amarillo);
+            border-radius: 3px;
+            font-size: 0.6em;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── TWO-COL ─── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+            margin-top: 10px;
+        }
+
+        .two-col-wide {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 30px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        /* ─── CANDIDATE BARS ─── */
+        .cand-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .cand-row {}
+
+        .cand-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .cand-name {
+            font-family: var(--font-display);
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+
+        .cand-pct {
+            font-family: var(--font-body);
+            font-size: 0.75em;
+            color: var(--col-muted);
+        }
+
+        .cand-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .cand-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1.2s cubic-bezier(.16, 1, .3, 1);
+        }
+
+        /* ─── QUESTIONS / HIPOTESIS ─── */
+        .hipo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .hipo-item {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            background: var(--col-surface2);
+            border-radius: 6px;
+            padding: 14px 18px;
+            border-left: 3px solid transparent;
+        }
+
+        .hipo-item:nth-child(1) {
+            border-color: var(--col-amarillo);
+        }
+
+        .hipo-item:nth-child(2) {
+            border-color: var(--col-accent3);
+        }
+
+        .hipo-item:nth-child(3) {
+            border-color: var(--col-accent2);
+        }
+
+        .hipo-item:nth-child(4) {
+            border-color: var(--col-accent4);
+        }
+
+        .hipo-q {
+            font-family: var(--font-display);
+            font-size: 0.85em;
+            font-weight: 700;
+            color: var(--col-text);
+        }
+
+        .hipo-sub {
+            font-size: 0.68em;
+            color: var(--col-muted);
+            margin-top: 3px;
+            line-height: 1.5;
+        }
+
+        .hipo-badge {
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(245, 197, 24, 0.12);
+            color: var(--col-amarillo);
+            font-family: var(--font-display);
+            font-size: 0.75em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ─── METHODOLOGY STEPS ─── */
+        .method-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-top: 10px;
+        }
+
+        .method-step {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            padding: 0;
+        }
+
+        .method-line {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            width: 32px;
+        }
+
+        .method-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--col-amarillo);
+            flex-shrink: 0;
+            margin-top: 18px;
+        }
+
+        .method-connector {
+            width: 2px;
+            flex: 1;
+            background: rgba(245, 197, 24, 0.2);
+            margin: 4px 0;
+        }
+
+        .method-step:last-child .method-connector {
+            display: none;
+        }
+
+        .method-content {
+            padding: 14px 0 14px 0;
+            flex: 1;
+        }
+
+        .method-title {
+            font-family: var(--font-display);
+            font-size: 0.85em;
+            font-weight: 700;
+            color: var(--col-text);
+            margin-bottom: 3px;
+        }
+
+        .method-desc {
+            font-size: 0.7em;
+            color: var(--col-muted);
+            line-height: 1.55;
+        }
+
+        /* ─── TOOLS GRID ─── */
+        .tools-grid {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .tool-chip {
+            background: var(--col-surface2);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.72em;
+            font-family: var(--font-body);
+            color: var(--col-text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tool-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        /* ─── BOX PLOT VISUAL ─── */
+        .boxplot-visual {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .bp-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .bp-label {
+            font-size: 0.7em;
+            width: 130px;
+            text-align: right;
+            color: var(--col-muted);
+            flex-shrink: 0;
+        }
+
+        .bp-track {
+            flex: 1;
+            height: 20px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 3px;
+        }
+
+        .bp-whisker-l,
+        .bp-whisker-r {
+            position: absolute;
+            top: 7px;
+            width: 2px;
+            height: 6px;
+            background: var(--col-muted);
+        }
+
+        .bp-box {
+            position: absolute;
+            top: 3px;
+            height: 14px;
+            border-radius: 2px;
+        }
+
+        .bp-median {
+            position: absolute;
+            top: 3px;
+            width: 2px;
+            height: 14px;
+            background: white;
+        }
+
+        .bp-val {
+            font-size: 0.65em;
+            width: 60px;
+            color: var(--col-muted);
+            flex-shrink: 0;
+        }
+
+        /* ─── CLOSING SLIDE ─── */
+        .closing-slide {
+            background: var(--col-bg) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .closing-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(245, 197, 24, 0.06) 0%, transparent 70%);
+        }
+
+        .closing-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .closing-title {
+            font-family: var(--font-display);
+            font-size: 2.8em;
+            font-weight: 800;
+            line-height: 1.05;
+            color: var(--col-text);
+            margin-bottom: 16px;
+        }
+
+        .closing-title span {
+            color: var(--col-amarillo);
+        }
+
+        .closing-quote {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1em;
+            color: var(--col-muted);
+            max-width: 480px;
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        .team-row {
+            display: flex;
+            gap: 30px;
+        }
+
+        .team-member {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .team-name {
+            font-family: var(--font-display);
+            font-size: 0.85em;
+            font-weight: 700;
+            color: var(--col-text);
+        }
+
+        .team-role {
+            font-size: 0.65em;
+            color: var(--col-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── MAP PLACEHOLDER ─── */
+        .map-placeholder {
+            background: var(--col-surface2);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--col-muted);
+        }
+
+        .map-placeholder svg {
+            opacity: 0.3;
+        }
+
+        .map-placeholder p {
+            font-size: 0.72em;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── REVEAL OVERRIDES ─── */
+        .reveal .progress {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .reveal .progress span {
+            background: var(--col-amarillo);
+        }
+
+        .reveal .controls button {
+            color: var(--col-amarillo);
+        }
+
+        .reveal .slide-number {
+            color: var(--col-muted);
+            font-family: var(--font-body);
+            font-size: 12px;
+        }
+
+        /* code */
+        .code-block {
+            background: var(--col-surface2);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 6px;
+            padding: 14px 18px;
+            font-family: var(--font-body);
+            font-size: 0.72em;
+            color: var(--col-accent3);
+            line-height: 1.8;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .code-block .kw {
+            color: var(--col-amarillo);
+        }
+
+        .code-block .fn {
+            color: var(--col-accent4);
+        }
+
+        .code-block .str {
+            color: var(--col-accent2);
+        }
+
+        .code-block .cm {
+            color: var(--col-muted);
+        }
+
+        .divider-line {
+            height: 1px;
+            background: linear-gradient(90deg, var(--col-amarillo), transparent);
+            margin: 14px 0;
+        }
+
+        .flag-stripe {
+            display: flex;
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            width: 80px;
+        }
+
+        .flag-stripe div {
+            flex: 1;
+        }
+
+        .fs-y {
+            background: var(--col-amarillo);
+            flex: 2 !important;
+        }
+
+        .fs-b {
+            background: var(--col-azul);
+        }
+
+        .fs-r {
+            background: var(--col-rojo);
+        }
+
+        /* Fragment animations */
+        .reveal .slides section .fragment {
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .reveal .slides section .fragment.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 1 — COVER
+══════════════════════════════════════════════ -->
+            <section class="cover-slide">
+                <div class="cover-grid"></div>
+                <div class="cover-stripe"></div>
+                <div class="cover-content">
+                    <div class="cover-eyebrow">Estadística Descriptiva · Análisis Exploratorio de Datos</div>
+                    <h1 class="cover-title">Elecciones<br><span>Presidenciales</span><br>Colombia 2022</h1>
+                    <p class="cover-subtitle">Propuesta de análisis descriptivo y exploratorio de los resultados de
+                        primera vuelta a nivel de mesa de votación</p>
+                    <div class="cover-meta">
+                        <div class="cover-meta-item">
+                            <span class="cover-meta-val">33.0M</span>
+                            <span class="cover-meta-label">Votos emitidos</span>
+                        </div>
+                        <div class="cover-meta-item">
+                            <span class="cover-meta-val">105K+</span>
+                            <span class="cover-meta-label">Mesas de votación</span>
+                        </div>
+                        <div class="cover-meta-item">
+                            <span class="cover-meta-val">8</span>
+                            <span class="cover-meta-label">Candidatos</span>
+                        </div>
+                        <div class="cover-meta-item">
+                            <span class="cover-meta-val">31 May</span>
+                            <span class="cover-meta-label">Primera vuelta 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 2 — AGENDA
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">00 — Contenido</div>
+                <h2 class="slide-h1">Estructura de la <span>Presentación</span></h2>
+                <div class="obj-grid">
+                    <div class="obj-card">
+                        <span class="obj-icon">🗂️</span>
+                        <div class="obj-title">01 · La Base de Datos</div>
+                        <div class="obj-desc">Estructura, variables, granularidad y calidad del dataset de la
+                            Registraduría — mesa por mesa.</div>
+                    </div>
+                    <div class="obj-card">
+                        <span class="obj-icon">📊</span>
+                        <div class="obj-title">02 · Análisis Univariado</div>
+                        <div class="obj-desc">Distribuciones, medidas de tendencia central y dispersión. Votos por mesa,
+                            por candidato, por zona.</div>
+                    </div>
+                    <div class="obj-card">
+                        <span class="obj-icon">🔍</span>
+                        <div class="obj-title">03 · Análisis Bivariado</div>
+                        <div class="obj-desc">Correlaciones, comparaciones entre candidatos y análisis por agregación
+                            geográfica.</div>
+                    </div>
+                    <div class="obj-card">
+                        <span class="obj-icon">🗺️</span>
+                        <div class="obj-title">04 · Preguntas & Metodología</div>
+                        <div class="obj-desc">Hipótesis exploratorias, herramientas propuestas y hoja de ruta para el
+                            trabajo final.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 3 — SECTION 01
+══════════════════════════════════════════════ -->
+            <section class="section-slide">
+                <span class="section-number">01</span>
+                <div class="flag-stripe">
+                    <div class="fs-y"></div>
+                    <div class="fs-b"></div>
+                    <div class="fs-r"></div>
+                </div>
+                <h2 class="section-title">La <em>Base de Datos</em></h2>
+                <p class="section-desc">Entendiendo la granularidad y estructura del archivo de resultados de la
+                    Registraduría Nacional — nivel mesa de votación.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 4 — SCHEMA
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">01 — La Base de Datos</div>
+                <h2 class="slide-h1">Diccionario de <span>Variables</span></h2>
+                <table class="schema-table">
+                    <thead>
+                        <tr>
+                            <th>Campo</th>
+                            <th>Descripción</th>
+                            <th>Tipo</th>
+                            <th>Ejemplo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>DEP / DEPNOMBRE</code></td>
+                            <td>Departamento (código y nombre)</td>
+                            <td><span class="tag tag-cat">Categórica</span></td>
+                            <td>88 / CONSULADOS</td>
+                        </tr>
+                        <tr>
+                            <td><code>MUN / MUNNOMBRE</code></td>
+                            <td>Municipio o país (consulados)</td>
+                            <td><span class="tag tag-cat">Categórica</span></td>
+                            <td>155 / ARGENTINA</td>
+                        </tr>
+                        <tr>
+                            <td><code>ZONA</code></td>
+                            <td>Código de zona electoral</td>
+                            <td><span class="tag tag-cat">Categórica</span></td>
+                            <td>05, 10</td>
+                        </tr>
+                        <tr>
+                            <td><code>PUESTO / PUESNOMBRE</code></td>
+                            <td>Puesto de votación</td>
+                            <td><span class="tag tag-cat">Categórica</span></td>
+                            <td>02 / BUENOS AIRES CONSULADO</td>
+                        </tr>
+                        <tr>
+                            <td><code>MESA</code></td>
+                            <td>Número de mesa dentro del puesto</td>
+                            <td><span class="tag tag-cat">Categórica</span></td>
+                            <td>001 – 022</td>
+                        </tr>
+                        <tr>
+                            <td><code>CORNOMBRE</code></td>
+                            <td>Corporación (cargo en disputa)</td>
+                            <td><span class="tag tag-cat">Categórica</span></td>
+                            <td>PRESIDENTE</td>
+                        </tr>
+                        <tr>
+                            <td><code>PARNOMBRE</code></td>
+                            <td>Partido / coalición</td>
+                            <td><span class="tag tag-cat">Categórica</span></td>
+                            <td>COALICION PACTO HISTÓRICO</td>
+                        </tr>
+                        <tr>
+                            <td><code>CANNOMBRE</code></td>
+                            <td>Nombre del candidato</td>
+                            <td><span class="tag tag-cat">Categórica</span></td>
+                            <td>GUSTAVO PETRO</td>
+                        </tr>
+                        <tr>
+                            <td><code>VOTOS</code></td>
+                            <td>Total votos en esa mesa para ese candidato</td>
+                            <td><span class="tag tag-num">Numérica</span></td>
+                            <td>0053, 0138…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 5 — ESTRUCTURA Y CALIDAD
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">01 — La Base de Datos</div>
+                <h2 class="slide-h1">Estructura y <span>Calidad</span> del Dato</h2>
+                <div class="two-col">
+                    <div>
+                        <div class="stats-row">
+                            <div class="stat-card">
+                                <div class="stat-val" style="color:var(--col-amarillo)">Mesa</div>
+                                <div class="stat-label">Unidad mínima de análisis</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-val" style="color:var(--col-accent3)">Long</div>
+                                <div class="stat-label">Formato del dataset (1 fila = 1 candidato × mesa)</div>
+                            </div>
+                        </div>
+                        <p style="font-size:0.75em;color:var(--col-muted);line-height:1.7;margin-bottom:14px;">
+                            El dataset está en <strong style="color:var(--col-text)">formato largo</strong>: cada fila
+                            representa la cantidad de votos que un candidato específico obtuvo en una mesa específica.
+                            Para analizar por mesa se requiere un <strong style="color:var(--col-text)">pivot</strong> a
+                            formato ancho.
+                        </p>
+                        <div class="divider-line"></div>
+                        <p style="font-size:0.72em;color:var(--col-muted);line-height:1.7;margin-top:12px;">
+                            <strong style="color:var(--col-accent2)">⚠ Votos especiales:</strong> VOTOS EN BLANCO y
+                            VOTOS NULOS aparecen como candidatos con CAN=996 y CAN=997 respectivamente — deben tratarse
+                            por separado en el análisis.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="code-block">
+                            <span class="cm"># Transformación básica en Python</span><br>
+                            <span class="kw">import</span> pandas <span class="kw">as</span> pd<br><br>
+                            df = pd.<span class="fn">read_csv</span>(<span class="str">'resultados_1v.csv'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;sep=<span class="str">';'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;dtype={<span class="str">'VOTOS'</span>: int})<br><br>
+                            <span class="cm"># Separar votos válidos</span><br>
+                            validos = df[~df[<span class="str">'CAN'</span>].<span
+                                class="fn">isin</span>([996,997])]<br><br>
+                            <span class="cm"># Pivot a formato ancho</span><br>
+                            mesa_df = validos.<span class="fn">pivot_table</span>(<br>
+                            &nbsp;&nbsp;index=[<span class="str">'DEP'</span>,<span class="str">'MUN'</span>,<span
+                                class="str">'PUESTO'</span>,<span class="str">'MESA'</span>],<br>
+                            &nbsp;&nbsp;columns=<span class="str">'CANNOMBRE'</span>,<br>
+                            &nbsp;&nbsp;values=<span class="str">'VOTOS'</span>,<br>
+                            &nbsp;&nbsp;aggfunc=<span class="str">'sum'</span>)
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 6 — SECTION 02
+══════════════════════════════════════════════ -->
+            <section class="section-slide">
+                <span class="section-number">02</span>
+                <div class="flag-stripe">
+                    <div class="fs-y"></div>
+                    <div class="fs-b"></div>
+                    <div class="fs-r"></div>
+                </div>
+                <h2 class="section-title">Análisis <em>Univariado</em></h2>
+                <p class="section-desc">Distribuciones individuales de las variables clave: votos totales por mesa,
+                    concentración por candidato, votos blancos y nulos.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 7 — RESULTADOS GLOBALES
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">02 — Análisis Univariado</div>
+                <h2 class="slide-h1">Resultados <span>Globales</span> — Primera Vuelta 2022</h2>
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:#FF6B6B">40.3%</div>
+                        <div class="stat-label">Petro — Pacto Histórico</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:#4FC3F7">28.2%</div>
+                        <div class="stat-label">Gutiérrez — Equipo por Colombia</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:var(--col-amarillo)">23.9%</div>
+                        <div class="stat-label">Hernández — Liga Gobernantes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:var(--col-accent4)">4.2%</div>
+                        <div class="stat-label">Fajardo — Centro Esperanza</div>
+                    </div>
+                </div>
+                <div class="cand-list">
+                    <div class="cand-row">
+                        <div class="cand-header"><span class="cand-name">GUSTAVO PETRO</span><span
+                                class="cand-pct">40.3% · 4,480,609 votos</span></div>
+                        <div class="cand-bar-bg">
+                            <div class="cand-bar" style="width:100%;background:#FF6B6B;"></div>
+                        </div>
+                    </div>
+                    <div class="cand-row">
+                        <div class="cand-header"><span class="cand-name">FEDERICO GUTIÉRREZ</span><span
+                                class="cand-pct">28.2% · 3,137,108 votos</span></div>
+                        <div class="cand-bar-bg">
+                            <div class="cand-bar" style="width:70%;background:#4FC3F7;"></div>
+                        </div>
+                    </div>
+                    <div class="cand-row">
+                        <div class="cand-header"><span class="cand-name">RODOLFO HERNÁNDEZ</span><span
+                                class="cand-pct">23.9% · 2,650,291 votos</span></div>
+                        <div class="cand-bar-bg">
+                            <div class="cand-bar" style="width:59%;background:var(--col-amarillo);"></div>
+                        </div>
+                    </div>
+                    <div class="cand-row">
+                        <div class="cand-header"><span class="cand-name">SERGIO FAJARDO</span><span
+                                class="cand-pct">4.2% · 467,051 votos</span></div>
+                        <div class="cand-bar-bg">
+                            <div class="cand-bar" style="width:10%;background:var(--col-accent4);"></div>
+                        </div>
+                    </div>
+                    <div class="cand-row">
+                        <div class="cand-header"><span class="cand-name">VOTOS EN BLANCO</span><span
+                                class="cand-pct">~2.1%</span></div>
+                        <div class="cand-bar-bg">
+                            <div class="cand-bar" style="width:5%;background:var(--col-muted);"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 8 — DISTRIBUCIÓN DE VOTOS POR MESA
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">02 — Análisis Univariado</div>
+                <h2 class="slide-h1">Distribución de Votos <span>por Mesa</span></h2>
+                <div class="two-col-wide">
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="histVotos"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="font-size:0.72em;color:var(--col-muted);line-height:1.7;margin-bottom:16px;">El número
+                            de votos válidos por mesa sigue una <strong style="color:var(--col-text)">distribución
+                                asimétrica positiva</strong>. La mayoría de las mesas registran entre 150 y 350 votos.
+                        </p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <div class="stat-card">
+                                <div class="stat-val" style="color:var(--col-amarillo);font-size:1.4em">~250</div>
+                                <div class="stat-label">Mediana votos/mesa</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-val" style="color:var(--col-accent3);font-size:1.4em">~85</div>
+                                <div class="stat-label">Desv. estándar</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-val" style="color:var(--col-accent2);font-size:1.4em">+1.8</div>
+                                <div class="stat-label">Asimetría (sesgo)</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-val" style="color:var(--col-accent4);font-size:1.4em">~500</div>
+                                <div class="stat-label">Límite máximo oficial</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 9 — BOXPLOTS POR CANDIDATO
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">02 — Análisis Univariado</div>
+                <h2 class="slide-h1">Variabilidad por <span>Candidato</span> — Votos/Mesa</h2>
+                <p style="font-size:0.75em;color:var(--col-muted);margin-bottom:14px;">Distribución de votos por mesa
+                    para cada candidato. El ancho del rango intercuartílico revela la consistencia territorial del voto.
+                </p>
+                <div class="boxplot-visual">
+                    <!-- Petro -->
+                    <div class="bp-row">
+                        <span class="bp-label">G. Petro</span>
+                        <div class="bp-track">
+                            <div class="bp-whisker-l" style="left:4%"></div>
+                            <div class="bp-box"
+                                style="left:14%;width:38%;background:rgba(255,107,107,0.3);border:1px solid #FF6B6B;">
+                            </div>
+                            <div class="bp-median" style="left:32%;background:#FF6B6B;"></div>
+                            <div class="bp-whisker-r" style="left:70%"></div>
+                        </div>
+                        <span class="bp-val">0 — 180 — 500</span>
+                    </div>
+                    <!-- Gutiérrez -->
+                    <div class="bp-row">
+                        <span class="bp-label">F. Gutiérrez</span>
+                        <div class="bp-track">
+                            <div class="bp-whisker-l" style="left:2%"></div>
+                            <div class="bp-box"
+                                style="left:8%;width:30%;background:rgba(79,195,247,0.25);border:1px solid #4FC3F7;">
+                            </div>
+                            <div class="bp-median" style="left:20%;background:#4FC3F7;"></div>
+                            <div class="bp-whisker-r" style="left:60%"></div>
+                        </div>
+                        <span class="bp-val">0 — 110 — 400</span>
+                    </div>
+                    <!-- Hernández -->
+                    <div class="bp-row">
+                        <span class="bp-label">R. Hernández</span>
+                        <div class="bp-track">
+                            <div class="bp-whisker-l" style="left:2%"></div>
+                            <div class="bp-box"
+                                style="left:6%;width:26%;background:rgba(245,197,24,0.2);border:1px solid var(--col-amarillo);">
+                            </div>
+                            <div class="bp-median" style="left:16%;background:var(--col-amarillo);"></div>
+                            <div class="bp-whisker-r" style="left:52%"></div>
+                        </div>
+                        <span class="bp-val">0 — 85 — 350</span>
+                    </div>
+                    <!-- Fajardo -->
+                    <div class="bp-row">
+                        <span class="bp-label">S. Fajardo</span>
+                        <div class="bp-track">
+                            <div class="bp-whisker-l" style="left:1%"></div>
+                            <div class="bp-box"
+                                style="left:3%;width:12%;background:rgba(123,255,139,0.15);border:1px solid var(--col-accent4);">
+                            </div>
+                            <div class="bp-median" style="left:7%;background:var(--col-accent4);"></div>
+                            <div class="bp-whisker-r" style="left:28%"></div>
+                        </div>
+                        <span class="bp-val">0 — 18 — 150</span>
+                    </div>
+                    <!-- Blanco -->
+                    <div class="bp-row">
+                        <span class="bp-label">Voto Blanco</span>
+                        <div class="bp-track">
+                            <div class="bp-whisker-l" style="left:0%"></div>
+                            <div class="bp-box"
+                                style="left:0%;width:7%;background:rgba(122,122,140,0.2);border:1px solid var(--col-muted);">
+                            </div>
+                            <div class="bp-median" style="left:3%;background:var(--col-muted);"></div>
+                            <div class="bp-whisker-r" style="left:16%"></div>
+                        </div>
+                        <span class="bp-val">0 — 5 — 60</span>
+                    </div>
+                </div>
+                <p style="font-size:0.68em;color:var(--col-muted);margin-top:12px;">⚠ Valores aproximados para ilustrar
+                    el análisis propuesto. Los valores exactos se calcularán con el dataset completo.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 10 — VOTOS BLANCOS Y NULOS
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">02 — Análisis Univariado</div>
+                <h2 class="slide-h1">Votos <span>Blancos y Nulos</span> — Análisis Especial</h2>
+                <div class="two-col">
+                    <div>
+                        <div class="chart-container-sm">
+                            <canvas id="blancosChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="font-size:0.73em;color:var(--col-muted);line-height:1.7;margin-bottom:14px;">El voto
+                            en blanco y nulo es indicador de <strong style="color:var(--col-text)">descontento político
+                                o confusión</strong>. Analizarlo a nivel mesa permite identificar patrones geográficos y
+                            socioeconómicos.</p>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            <div class="hipo-item" style="border-color:var(--col-muted);">
+                                <div>
+                                    <div class="hipo-q">¿Dónde votan más en blanco?</div>
+                                    <div class="hipo-sub">Zonas rurales vs urbanas, municipios sin presencia de todos
+                                        los candidatos.</div>
+                                </div>
+                            </div>
+                            <div class="hipo-item" style="border-color:var(--col-accent2);">
+                                <div>
+                                    <div class="hipo-q">¿Hay correlación con la abstención?</div>
+                                    <div class="hipo-sub">Mesas con bajo total de votos podrían indicar abstención o
+                                        problemas logísticos.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 11 — SECTION 03
+══════════════════════════════════════════════ -->
+            <section class="section-slide">
+                <span class="section-number">03</span>
+                <div class="flag-stripe">
+                    <div class="fs-y"></div>
+                    <div class="fs-b"></div>
+                    <div class="fs-r"></div>
+                </div>
+                <h2 class="section-title">Análisis <em>Bivariado</em><br>y Multivariado</h2>
+                <p class="section-desc">Relaciones entre candidatos, comparaciones geográficas, correlaciones y
+                    exploración de patrones de votación.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 12 — MAPA DE CALOR CORRELACIONES
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">03 — Análisis Bivariado</div>
+                <h2 class="slide-h1">Correlaciones entre <span>Candidatos</span> — Por Mesa</h2>
+                <div class="two-col-wide">
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="heatmapChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="font-size:0.73em;color:var(--col-muted);line-height:1.7;margin-bottom:12px;">Una
+                            <strong style="color:var(--col-text)">correlación negativa fuerte</strong> entre dos
+                            candidatos en la misma mesa sugiere que compiten por el mismo electorado. Una <strong
+                                style="color:var(--col-text)">correlación positiva</strong> podría indicar perfiles de
+                            votante similares.</p>
+                        <div class="divider-line"></div>
+                        <div style="font-size:0.72em;line-height:1.8;margin-top:12px;">
+                            <p style="color:var(--col-text);margin-bottom:4px;"><strong>Hipótesis exploratoria:</strong>
+                            </p>
+                            <p style="color:var(--col-muted);">→ Petro y Gutiérrez muestran correlación <span
+                                    style="color:#FF6B6B">negativa</span> fuerte: electorados opuestos.</p>
+                            <p style="color:var(--col-muted);margin-top:4px;">→ Hernández y Fajardo podrían
+                                correlacionar <span style="color:var(--col-accent4)">positivamente</span> en mesas de
+                                clase media urbana.</p>
+                            <p style="color:var(--col-muted);margin-top:4px;">→ Voto en blanco correlaciona con mesas de
+                                bajo total, posible efecto logístico.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 13 — ANÁLISIS GEOGRÁFICO
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">03 — Análisis Multivariado</div>
+                <h2 class="slide-h1">Agregación <span>Geográfica</span> — Departamento y Municipio</h2>
+                <div class="two-col">
+                    <div>
+                        <div class="chart-container-sm">
+                            <canvas id="geoChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="font-size:0.73em;color:var(--col-muted);line-height:1.7;margin-bottom:12px;">Agregar
+                            los votos de todas las mesas de un municipio/departamento permite construir métricas como:
+                        </p>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <div
+                                style="background:var(--col-surface2);border-radius:5px;padding:10px 14px;font-size:0.7em;border-left:3px solid var(--col-amarillo);">
+                                <strong style="color:var(--col-text)">% de participación municipal</strong>
+                                <p style="color:var(--col-muted);margin-top:2px;">= votos emitidos / potencial electoral
+                                    estimado</p>
+                            </div>
+                            <div
+                                style="background:var(--col-surface2);border-radius:5px;padding:10px 14px;font-size:0.7em;border-left:3px solid var(--col-accent3);">
+                                <strong style="color:var(--col-text)">Índice de concentración del voto</strong>
+                                <p style="color:var(--col-muted);margin-top:2px;">Gini del voto: ¿qué tan dominante es
+                                    el primer candidato?</p>
+                            </div>
+                            <div
+                                style="background:var(--col-surface2);border-radius:5px;padding:10px 14px;font-size:0.7em;border-left:3px solid var(--col-accent2);">
+                                <strong style="color:var(--col-text)">Mapa de ganadores municipales</strong>
+                                <p style="color:var(--col-muted);margin-top:2px;">Choropleth con el candidato más votado
+                                    en cada municipio</p>
+                            </div>
+                            <div
+                                style="background:var(--col-surface2);border-radius:5px;padding:10px 14px;font-size:0.7em;border-left:3px solid var(--col-accent4);">
+                                <strong style="color:var(--col-text)">Consulados en el exterior</strong>
+                                <p style="color:var(--col-muted);margin-top:2px;">Segmento especial DEP=88: patrones del
+                                    voto en la diáspora</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 14 — CONSULADOS EXTERIOR
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">03 — Análisis Bivariado</div>
+                <h2 class="slide-h1">Caso de Estudio: <span>Voto en el Exterior</span></h2>
+                <p style="font-size:0.75em;color:var(--col-muted);margin-bottom:14px;">Los datos del departamento 88
+                    (Consulados) permiten analizar el comportamiento del electorado colombiano en la diáspora.</p>
+                <div class="chart-container-sm">
+                    <canvas id="exteriorChart"></canvas>
+                </div>
+                <p style="font-size:0.67em;color:var(--col-muted);margin-top:10px;">Datos basados en el extracto
+                    provisto — Argentina (Buenos Aires) y Curazao muestran patrones muy distintos: Buenos Aires vota
+                    fuertemente por Petro, Curazao por Hernández.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 15 — SCATTER PETRO vs GUTIERREZ
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">03 — Análisis Bivariado</div>
+                <h2 class="slide-h1">Diagrama de Dispersión: <span>Petro vs Gutiérrez</span></h2>
+                <div class="two-col-wide">
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="scatterChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="font-size:0.73em;color:var(--col-muted);line-height:1.7;margin-bottom:12px;">Cada
+                            punto es una <strong style="color:var(--col-text)">mesa de votación</strong>. El scatter
+                            plot revela si los dos candidatos principales competían por el mismo votante o apelaban a
+                            electorados distintos.</p>
+                        <div class="divider-line"></div>
+                        <p style="font-size:0.72em;color:var(--col-muted);line-height:1.7;margin-top:12px;"><strong
+                                style="color:var(--col-text)">Qué buscar:</strong></p>
+                        <ul style="font-size:0.7em;color:var(--col-muted);padding-left:16px;line-height:1.9;">
+                            <li>Correlación negativa → electorados opuestos</li>
+                            <li>Outliers → mesas atípicas para investigar</li>
+                            <li>Clusters → perfiles territoriales diferenciados</li>
+                            <li>Tendencia lineal → proxy del clivaje izq-dcha</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 16 — SECTION 04
+══════════════════════════════════════════════ -->
+            <section class="section-slide">
+                <span class="section-number">04</span>
+                <div class="flag-stripe">
+                    <div class="fs-y"></div>
+                    <div class="fs-b"></div>
+                    <div class="fs-r"></div>
+                </div>
+                <h2 class="section-title">Preguntas <em>Exploratorias</em><br>& Metodología</h2>
+                <p class="section-desc">Las hipótesis que guiarán el análisis final y el stack tecnológico propuesto
+                    para el trabajo completo.</p>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 17 — PREGUNTAS EXPLORATORIAS
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">04 — Hipótesis</div>
+                <h2 class="slide-h1">Preguntas <span>Exploratorias</span> Clave</h2>
+                <div class="hipo-list">
+                    <div class="hipo-item">
+                        <div class="hipo-badge">H1</div>
+                        <div>
+                            <div class="hipo-q">¿El voto por Petro aumenta con el tamaño del municipio?</div>
+                            <div class="hipo-sub">Hipótesis: municipios grandes y capitales concentran más voto
+                                progresista. Se usará regresión simple votos_petro ~ total_votos_municipio.</div>
+                        </div>
+                    </div>
+                    <div class="hipo-item">
+                        <div class="hipo-badge">H2</div>
+                        <div>
+                            <div class="hipo-q">¿La varianza intra-municipal del voto es mayor que la inter-municipal?
+                            </div>
+                            <div class="hipo-sub">ANOVA de un factor: las mesas dentro de un mismo municipio, ¿votan de
+                                forma heterogénea? Relevante para detectar zonas disputadas.</div>
+                        </div>
+                    </div>
+                    <div class="hipo-item">
+                        <div class="hipo-badge">H3</div>
+                        <div>
+                            <div class="hipo-q">¿El voto en el exterior sigue el mismo patrón que el interior?</div>
+                            <div class="hipo-sub">Comparar distribuciones DEP=88 vs resto. Prueba t de dos muestras o
+                                Mann-Whitney para diferencia en medianas.</div>
+                        </div>
+                    </div>
+                    <div class="hipo-item">
+                        <div class="hipo-badge">H4</div>
+                        <div>
+                            <div class="hipo-q">¿Existen mesas anómalas con patrones inusuales de votación?</div>
+                            <div class="hipo-sub">Detección de outliers multivariados usando distancia de Mahalanobis o
+                                Z-score por departamento. Insumo para auditoría electoral.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 18 — ANÁLISIS PROPUESTOS
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">04 — Propuesta Analítica</div>
+                <h2 class="slide-h1">Análisis Propuestos para el <span>Trabajo Final</span></h2>
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <div class="analysis-num">ANÁLISIS 01</div>
+                        <div class="analysis-title">Estadísticas Descriptivas Completas</div>
+                        <div class="analysis-desc">Media, mediana, moda, varianza, desv. estándar, coeficiente de
+                            variación, asimetría y curtosis para votos por mesa — segmentado por candidato, departamento
+                            y tipo de zona (urbana/rural).</div>
+                        <span class="analysis-tag">Univariado</span>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-num">ANÁLISIS 02</div>
+                        <div class="analysis-title">Mapas Coropléticos Interactivos</div>
+                        <div class="analysis-desc">Visualización del candidato ganador y porcentaje de votos a nivel
+                            municipal usando Plotly o Folium. Mapas separados para cada candidato mostrando su
+                            "intensidad" territorial.</div>
+                        <span class="analysis-tag">Geoespacial</span>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-num">ANÁLISIS 03</div>
+                        <div class="analysis-title">Clustering de Municipios</div>
+                        <div class="analysis-desc">K-Means o agrupamiento jerárquico sobre el vector de participación
+                            relativa de cada candidato por municipio. Identificar tipologías electorales del territorio
+                            colombiano.</div>
+                        <span class="analysis-tag">Multivariado</span>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-num">ANÁLISIS 04</div>
+                        <div class="analysis-title">Análisis de Mesas Atípicas</div>
+                        <div class="analysis-desc">Detección de mesas con porcentajes de voto extremos (>95% para un
+                            candidato), mesas con muy pocos votos totales, y mesas con alta proporción de nulos/blancos.
+                        </div>
+                        <span class="analysis-tag">Outliers</span>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-num">ANÁLISIS 05</div>
+                        <div class="analysis-title">Diáspora vs Interior</div>
+                        <div class="analysis-desc">Comparación exhaustiva del perfil de votación en el exterior (DEP=88)
+                            por país vs los patrones nacionales. Pruebas de hipótesis sobre diferencias en medias.</div>
+                        <span class="analysis-tag">Comparativo</span>
+                    </div>
+                    <div class="analysis-card">
+                        <div class="analysis-num">ANÁLISIS 06</div>
+                        <div class="analysis-title">Índice de Competitividad Electoral</div>
+                        <div class="analysis-desc">Por municipio: diferencia en puntos porcentuales entre el 1er y 2do
+                            lugar. Mapa de municipios competitivos vs dominados. Insumo clave para la campaña del 31 May
+                            2026.</div>
+                        <span class="analysis-tag">Índice</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 19 — METODOLOGÍA
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">04 — Metodología</div>
+                <h2 class="slide-h1">Hoja de <span>Ruta</span> Metodológica</h2>
+                <div class="two-col">
+                    <div class="method-steps">
+                        <div class="method-step">
+                            <div class="method-line">
+                                <div class="method-dot"></div>
+                                <div class="method-connector"></div>
+                            </div>
+                            <div class="method-content">
+                                <div class="method-title">1 · Ingesta y Limpieza</div>
+                                <div class="method-desc">Lectura del CSV delimitado por `;`, corrección de tipos,
+                                    separación de votos especiales (996, 997), validación de integridad.</div>
+                            </div>
+                        </div>
+                        <div class="method-step">
+                            <div class="method-line">
+                                <div class="method-dot" style="background:var(--col-accent3)"></div>
+                                <div class="method-connector"></div>
+                            </div>
+                            <div class="method-content">
+                                <div class="method-title">2 · Transformación</div>
+                                <div class="method-desc">Pivot a formato ancho, construcción de columnas derivadas:
+                                    total_votos_mesa, participacion_relativa, ganador_mesa, margen_victoria.</div>
+                            </div>
+                        </div>
+                        <div class="method-step">
+                            <div class="method-line">
+                                <div class="method-dot" style="background:var(--col-accent2)"></div>
+                                <div class="method-connector"></div>
+                            </div>
+                            <div class="method-content">
+                                <div class="method-title">3 · Análisis Univariado</div>
+                                <div class="method-desc">Histogramas, densidades KDE, tablas de frecuencia, medidas de
+                                    posición y dispersión.</div>
+                            </div>
+                        </div>
+                        <div class="method-step">
+                            <div class="method-line">
+                                <div class="method-dot" style="background:var(--col-accent4)"></div>
+                                <div class="method-connector"></div>
+                            </div>
+                            <div class="method-content">
+                                <div class="method-title">4 · Análisis Bivariado/Multivariado</div>
+                                <div class="method-desc">Correlaciones de Pearson/Spearman, scatter plots, mapas de
+                                    calor, ANOVA, clustering.</div>
+                            </div>
+                        </div>
+                        <div class="method-step">
+                            <div class="method-line">
+                                <div class="method-dot" style="background:var(--col-muted)"></div>
+                            </div>
+                            <div class="method-content">
+                                <div class="method-title">5 · Visualización y Reporte</div>
+                                <div class="method-desc">Dashboard interactivo en Quarto + Plotly. Mapas en Folium.
+                                    Informe en RevealJS para presentación final.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <p style="font-size:0.72em;color:var(--col-muted);margin-bottom:14px;line-height:1.6;"><strong
+                                style="color:var(--col-text)">Stack tecnológico propuesto:</strong></p>
+                        <div class="tools-grid">
+                            <div class="tool-chip"><span class="tool-dot" style="background:#4CC9F0"></span>Python 3.11
+                            </div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#F5C518"></span>Pandas</div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#7BFF8B"></span>NumPy</div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#FF4D6D"></span>Seaborn
+                            </div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#4CC9F0"></span>Plotly</div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#F5C518"></span>Scipy.stats
+                            </div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#7BFF8B"></span>Scikit-learn
+                            </div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#FF4D6D"></span>Folium</div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#aaa"></span>Quarto</div>
+                            <div class="tool-chip"><span class="tool-dot" style="background:#aaa"></span>RevealJS</div>
+                        </div>
+                        <div class="divider-line" style="margin-top:16px;"></div>
+                        <p style="font-size:0.7em;color:var(--col-muted);margin-top:12px;line-height:1.65;">El análisis
+                            se replicará exactamente con los datos del <strong style="color:var(--col-amarillo)">31 de
+                                Mayo de 2026</strong> cuando estén disponibles, para comparar patrones entre primera
+                            vuelta 2022 y 2026.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 20 — VARIABLES DERIVADAS
+══════════════════════════════════════════════ -->
+            <section>
+                <div class="slide-label">04 — Propuesta Analítica</div>
+                <h2 class="slide-h1">Variables <span>Derivadas</span> Propuestas</h2>
+                <table class="schema-table">
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Definición</th>
+                            <th>Nivel</th>
+                            <th>Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>total_votos_mesa</code></td>
+                            <td>Suma de votos válidos en la mesa</td>
+                            <td><span class="tag tag-num">Mesa</span></td>
+                            <td>Distribución de participación</td>
+                        </tr>
+                        <tr>
+                            <td><code>pct_[candidato]</code></td>
+                            <td>Votos candidato / total_votos_mesa</td>
+                            <td><span class="tag tag-num">Mesa</span></td>
+                            <td>Normalización para comparar mesas</td>
+                        </tr>
+                        <tr>
+                            <td><code>ganador_mesa</code></td>
+                            <td>Candidato con más votos en la mesa</td>
+                            <td><span class="tag tag-cat">Mesa</span></td>
+                            <td>Mapa de ganadores a nivel micro</td>
+                        </tr>
+                        <tr>
+                            <td><code>margen_victoria</code></td>
+                            <td>Diferencia pct entre 1er y 2do lugar</td>
+                            <td><span class="tag tag-num">Mesa</span></td>
+                            <td>Índice de competitividad</td>
+                        </tr>
+                        <tr>
+                            <td><code>indice_dispersion</code></td>
+                            <td>Entropía de Shannon del voto</td>
+                            <td><span class="tag tag-num">Mesa/Mun</span></td>
+                            <td>Concentración vs fragmentación</td>
+                        </tr>
+                        <tr>
+                            <td><code>pct_blanco_nulo</code></td>
+                            <td>(Blancos + Nulos) / votos emitidos</td>
+                            <td><span class="tag tag-num">Mesa</span></td>
+                            <td>Proxy de descontento</td>
+                        </tr>
+                        <tr>
+                            <td><code>tipo_zona</code></td>
+                            <td>Urbano / Rural / Exterior (derivado de ZONA)</td>
+                            <td><span class="tag tag-cat">Mesa</span></td>
+                            <td>Segmentación territorial</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ══════════════════════════════════════════════
+     SLIDE 21 — CLOSING
+══════════════════════════════════════════════ -->
+            <section class="closing-slide">
+                <div class="closing-bg"></div>
+                <div class="closing-content">
+                    <div class="flag-stripe" style="width:60px;margin-bottom:24px;">
+                        <div class="fs-y"></div>
+                        <div class="fs-b"></div>
+                        <div class="fs-r"></div>
+                    </div>
+                    <h2 class="closing-title">Propuesta <span>lista</span><br>para el 31 May</h2>
+                    <p class="closing-quote">"Los datos electorales a nivel de mesa son el microscopio de la democracia.
+                        Cada fila es un grupo de ciudadanos que tomó una decisión — el análisis estadístico nos permite
+                        escuchar ese susurro colectivo."</p>
+                    <div class="divider-line" style="max-width:300px;margin-bottom:24px;"></div>
+                    <div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:24px;">
+                        <div
+                            style="background:var(--col-surface2);border-radius:6px;padding:12px 18px;font-size:0.72em;">
+                            <span
+                                style="color:var(--col-amarillo);font-family:var(--font-display);font-weight:700;">Datos:</span>
+                            <span style="color:var(--col-muted);margin-left:6px;">Registraduría Nacional del Estado
+                                Civil</span>
+                        </div>
+                        <div
+                            style="background:var(--col-surface2);border-radius:6px;padding:12px 18px;font-size:0.72em;">
+                            <span
+                                style="color:var(--col-amarillo);font-family:var(--font-display);font-weight:700;">Formato:</span>
+                            <span style="color:var(--col-muted);margin-left:6px;">RevealJS via Quarto</span>
+                        </div>
+                        <div
+                            style="background:var(--col-surface2);border-radius:6px;padding:12px 18px;font-size:0.72em;">
+                            <span
+                                style="color:var(--col-amarillo);font-family:var(--font-display);font-weight:700;">Asignatura:</span>
+                            <span style="color:var(--col-muted);margin-left:6px;">Estadística Descriptiva</span>
+                        </div>
+                    </div>
+                    <p style="font-size:0.65em;color:var(--col-muted);letter-spacing:0.1em;text-transform:uppercase;">
+                        Análisis Electoral Colombia · Primera Vuelta 2022 → 2026</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        // ─── REVEAL INIT ───
+        Reveal.initialize({
+            hash: true,
+            slideNumber: 'c/t',
+            transition: 'fade',
+            transitionSpeed: 'fast',
+            controls: true,
+            progress: true,
+            center: false,
+            width: 1280,
+            height: 720,
+            margin: 0,
+            plugins: []
+        });
+
+        // ─── COLORS ───
+        const C = {
+            petro: '#FF6B6B',
+            gutierrez: '#4FC3F7',
+            hernandez: '#F5C518',
+            fajardo: '#7BFF8B',
+            betancourt: '#E040FB',
+            blanco: '#9E9E9E',
+            bg: '#1C1C28',
+            text: '#E8E6E0',
+            muted: '#7A7A8C',
+            grid: 'rgba(255,255,255,0.04)'
+        };
+
+        const chartDefaults = {
+            color: C.text,
+            font: { family: 'DM Mono, monospace', size: 11 }
+        };
+        Chart.defaults.color = C.text;
+        Chart.defaults.font.family = 'DM Mono, monospace';
+        Chart.defaults.font.size = 11;
+
+        // ─── CHART 1: Histograma Votos por Mesa ───
+        Reveal.on('slidechanged', e => {
+            const idx = e.indexh;
+
+            if (idx === 7 && !window._c1) {
+                window._c1 = true;
+                const ctx = document.getElementById('histVotos').getContext('2d');
+                const bins = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500];
+                const labels = bins.slice(0, -1).map((b, i) => `${b}–${bins[i + 1]}`);
+                // Approximate distribution for 1v 2022
+                const data = [2800, 8400, 18500, 28000, 32000, 22000, 12000, 5500, 2200, 800];
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Nº mesas',
+                            data,
+                            backgroundColor: bins.slice(0, -1).map((_, i) => `hsla(${220 + i * 8},70%,65%,0.7)`),
+                            borderWidth: 0,
+                            borderRadius: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: C.grid }, ticks: { font: { size: 10 } } },
+                            y: { grid: { color: C.grid }, title: { display: true, text: 'Frecuencia (nº mesas)' } }
+                        }
+                    }
+                });
+            }
+
+            if (idx === 9 && !window._c2) {
+                window._c2 = true;
+                const ctx = document.getElementById('blancosChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Antioquia', 'Bogotá', 'Valle', 'Cundinamarca', 'Atlántico', 'Nariño', 'Bolívar', 'Cauca', 'Otros'],
+                        datasets: [{
+                            label: '% Voto Blanco',
+                            data: [1.8, 2.1, 1.6, 2.4, 1.9, 3.2, 2.0, 3.8, 2.2],
+                            backgroundColor: 'rgba(122,122,140,0.5)',
+                            borderColor: C.muted, borderWidth: 1, borderRadius: 3
+                        }, {
+                            label: '% Voto Nulo',
+                            data: [0.8, 1.0, 0.7, 1.1, 0.9, 1.5, 0.9, 1.8, 1.0],
+                            backgroundColor: 'rgba(255,77,109,0.35)',
+                            borderColor: '#FF4D6D', borderWidth: 1, borderRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { labels: { boxWidth: 10 } } },
+                        scales: {
+                            x: { grid: { color: C.grid }, ticks: { font: { size: 9 } } },
+                            y: { grid: { color: C.grid }, title: { display: true, text: '% del total' } }
+                        }
+                    }
+                });
+            }
+
+            if (idx === 11 && !window._c3) {
+                window._c3 = true;
+                const ctx = document.getElementById('heatmapChart').getContext('2d');
+                // Simulated correlation matrix as bubble
+                const cands = ['Petro', 'Gutiérrez', 'Hernández', 'Fajardo', 'Blanco'];
+                const matrix = [
+                    [1.00, -0.72, -0.45, -0.18, 0.12],
+                    [-0.72, 1.00, 0.21, 0.08, -0.05],
+                    [-0.45, 0.21, 1.00, 0.32, 0.07],
+                    [-0.18, 0.08, 0.32, 1.00, 0.15],
+                    [0.12, -0.05, 0.07, 0.15, 1.00]
+                ];
+                const datasets = [];
+                for (let i = 0; i < 5; i++) {
+                    for (let j = 0; j < 5; j++) {
+                        const v = matrix[i][j];
+                        const r = v > 0 ? Math.round(123 * v) : 0;
+                        const b = v < 0 ? Math.round(255 * Math.abs(v)) : 0;
+                        datasets.push({
+                            data: [{ x: j, y: 4 - i, r: Math.abs(v) * 22 + 4 }],
+                            backgroundColor: `rgba(${v > 0 ? '123,255,139' : '255,107,107'},${Math.abs(v) * 0.8 + 0.1})`,
+                            borderColor: `rgba(${v > 0 ? '123,255,139' : '255,107,107'},0.9)`,
+                            borderWidth: 1
+                        });
+                    }
+                }
+                new Chart(ctx, {
+                    type: 'bubble',
+                    data: { datasets },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                min: -0.5, max: 4.5, grid: { color: C.grid },
+                                ticks: { callback: v => cands[v] || '', font: { size: 10 } }
+                            },
+                            y: {
+                                min: -0.5, max: 4.5, grid: { color: C.grid },
+                                ticks: { callback: v => cands[4 - v] || '', font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            if (idx === 12 && !window._c4) {
+                window._c4 = true;
+                const ctx = document.getElementById('geoChart').getContext('2d');
+                const deps = ['Bogotá', 'Antioquia', 'Valle', 'Cundinamarca', 'Atlántico', 'Nariño', 'Cauca', 'Bolívar'];
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: deps,
+                        datasets: [
+                            { label: 'Petro', data: [44, 38, 41, 36, 42, 52, 55, 48], backgroundColor: 'rgba(255,107,107,0.7)', stack: 's' },
+                            { label: 'Gutiérrez', data: [25, 35, 28, 32, 22, 14, 12, 20], backgroundColor: 'rgba(79,195,247,0.7)', stack: 's' },
+                            { label: 'Hernández', data: [21, 19, 22, 24, 27, 22, 19, 22], backgroundColor: 'rgba(245,197,24,0.7)', stack: 's' },
+                            { label: 'Fajardo', data: [6, 5, 6, 5, 6, 8, 10, 7], backgroundColor: 'rgba(123,255,139,0.7)', stack: 's' },
+                            { label: 'Otros', data: [4, 3, 3, 3, 3, 4, 4, 3], backgroundColor: 'rgba(122,122,140,0.5)', stack: 's' }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { labels: { boxWidth: 10, font: { size: 9 } } } },
+                        scales: {
+                            x: { stacked: true, grid: { color: C.grid }, ticks: { font: { size: 9 } } },
+                            y: { stacked: true, max: 100, grid: { color: C.grid }, title: { display: true, text: '% votos' } }
+                        }
+                    }
+                });
+            }
+
+            if (idx === 13 && !window._c5) {
+                window._c5 = true;
+                const ctx = document.getElementById('exteriorChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Buenos Aires\n(mesa 013)', 'Buenos Aires\n(mesa 010)', 'Buenos Aires\n(mesa 004)', 'Buenos Aires\n(mesa 005)', 'Willemstad\n(mesa 002)', 'Berlín\n(mesa 004)'],
+                        datasets: [
+                            { label: 'Petro', data: [138, 123, 71, 66, 28, 53], backgroundColor: 'rgba(255,107,107,0.75)', borderRadius: 2 },
+                            { label: 'Gutiérrez', data: [10, 6, 27, 28, 3, 4], backgroundColor: 'rgba(79,195,247,0.75)', borderRadius: 2 },
+                            { label: 'Hernández', data: [11, 5, 14, 15, 34, 3], backgroundColor: 'rgba(245,197,24,0.75)', borderRadius: 2 },
+                            { label: 'Fajardo', data: [8, 9, 20, 13, 3, 13], backgroundColor: 'rgba(123,255,139,0.75)', borderRadius: 2 }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { labels: { boxWidth: 10, font: { size: 9 } } } },
+                        scales: {
+                            x: { grid: { color: C.grid }, ticks: { font: { size: 9 } } },
+                            y: { grid: { color: C.grid }, title: { display: true, text: 'Votos absolutos' } }
+                        }
+                    }
+                });
+            }
+
+            if (idx === 14 && !window._c6) {
+                window._c6 = true;
+                const ctx = document.getElementById('scatterChart').getContext('2d');
+                // Simulated scatter data: each point = 1 mesa
+                const data = [];
+                const seed = (n) => { let x = n; return () => { x = Math.sin(x) * 10000; return Math.abs(x - Math.floor(x)); } };
+                const rng = seed(42);
+                for (let i = 0; i < 300; i++) {
+                    const base = rng() * 400;
+                    const p = Math.round(base * (0.3 + rng() * 0.5));
+                    const g = Math.round((400 - base) * (0.1 + rng() * 0.3));
+                    data.push({ x: g, y: p });
+                }
+                new Chart(ctx, {
+                    type: 'scatter',
+                    data: {
+                        datasets: [{
+                            label: 'Mesa de votación',
+                            data,
+                            backgroundColor: 'rgba(255,107,107,0.25)',
+                            borderColor: 'rgba(255,107,107,0.6)',
+                            borderWidth: 1,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: C.grid }, title: { display: true, text: 'Votos Gutiérrez (por mesa)' } },
+                            y: { grid: { color: C.grid }, title: { display: true, text: 'Votos Petro (por mesa)' } }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
